@@ -670,7 +670,7 @@ void executeInfection(GridCell*** MeshA, int i, int j, int n)
 
 	if(random_inf > INFECTION_PROB) return;
 
-	if(random_inf >= 1 - KILL_ZOMBIE)
+	if(random_inf >= 0.95)
 	{
 		delete MeshA[i][j];
 		MeshA[i][j] = new GridCell();
