@@ -1,5 +1,8 @@
-#include "mesh.h"
+/*
+File: Mesh.cpp
+*/
 
+#include "mesh.h"
 class Zombie
 {
 	private:
@@ -21,18 +24,19 @@ class Human
 	private:
 		int gender;
 		int birthdate;
+		int age_group;
 		int status;
 		int exposed_date;
-		int ageModifier;
 
 	public:
-		Human(int aux_gender, int aux_birth, int aux_status)
+		Human(int aux_gender, int aux_birth, int aux_age, int aux_status)
 		{
 			gender = aux_gender;
 			birthdate = aux_birth;
+			age_group = aux_age;
 			status = aux_status;
+
 			exposed_date = 0;
-			ageModifier = 0;
 			return;
 		}
 		int getGender()
@@ -47,19 +51,19 @@ class Human
 		{
 			return status;
 		}
-		int getAgeModifier()
+		int getExposedDate()
 		{
-			return ageModifier;
+			return exposed_date;
+		}
+		int getAgeGroup()
+		{
+			return age_group;
 		}
 		void infect(int n)
 		{
 			status = EXPOSED;
 			exposed_date = n;
 			return;
-		}
-		int getExposedDate()
-		{
-			return exposed_date;
 		}
 };
 
@@ -145,7 +149,7 @@ int getPopulation(GridCell*** Mesh)
 	return populationTotal;
 }
 
-double getNumberOfPairs(GridCell*** Mesh)
+double getPairingNumber(GridCell*** Mesh)
 {
 	int i, j;
 	double male, female;
@@ -670,7 +674,7 @@ void executeInfection(GridCell*** MeshA, int i, int j, int n)
 
 	if(random_inf > INFECTION_PROB) return;
 
-	if(random_inf >= 0.95)
+	if(random_inf >= 1 - KILL_ZOMBIE)
 	{
 		delete MeshA[i][j];
 		MeshA[i][j] = new GridCell();
@@ -766,17 +770,10 @@ void unlock(int i, bool *locks) {
 }
 #endif
 
-int main(int argc, char **argv) 
+void initializeMesh(GridCell*** MeshA, GridCell*** MeshB)
 {
+	int i, j;
 
-	int i, j, n, num_zombies = 0;
-	double aux_rand;
-	bool *locks = new bool[SIZE + 2];
-	GridCell ***MeshA, ***MeshB, ***aux;
-
-	MeshA = (GridCell***)malloc((SIZE+2)*(sizeof(GridCell**)));
-	MeshB = (GridCell***)malloc((SIZE+2)*(sizeof(GridCell**)));
-	
 	for(i = 0; i < SIZE+2; i++)
 	{
 		MeshA[i] = (GridCell**)malloc((SIZE+2)*(sizeof(GridCell*)));
@@ -791,43 +788,95 @@ int main(int argc, char **argv)
 			MeshB[i][j] = new GridCell();
 		}
 	}
-	//omp_get_thread_number();
-	srand48(8767135);
+	return;
+}
 
-	for (i = 0; i < SIZE + 2; i++) locks[i] = false;
-	
-	for (i = 1; i <= SIZE; i++)
+int fillMesh(GridCell*** Mesh)
+{
+	int i, j, num_zombies;
+	double aux_rand;
+	int gender, age, agemodifier, birthdate;
+
+	for (num_zombies = 0, i = 1; i <= SIZE; i++)
 	{ 
 		for (j = 1; j <= SIZE; j++)
 		{
 			aux_rand = drand48();
+			
 			if (aux_rand < 0.171)
-			{				
-				if(drand48() < 0.525) MeshA[i][j]->setToHuman(new Human(MALE, 0, 0));
-				else MeshA[i][j]->setToHuman(new Human(FEMALE, 0, 0));
+			{	
+				/*
+				Define gender.
+				*/			
+				if(drand48() < (NT_MALE_PERCENTAGE/100)) gender = MALE;
+				else gender = FEMALE;
+
+				/*
+				Define age group.
+				*/
+				aux_rand = drand48();
+				if(aux_rand < (NT_YOUNG/100)) agemodifier = YOUNG;
+				else if(aux_rand < (NT_ADULT/100)) agemodifier = ADULT;
+				else agemodifier = ELDER;
+
+				/*
+				Define age (in steps)
+				*/
+
+				/*
+				Creates human.
+				*/
+				Mesh[i][j]->setToHuman(new Human(gender, 0, agemodifier, HEALTHY));
 			}
 			else if(aux_rand >= 0.999992)
 			{
-				MeshA[i][j]->setToZombie(new Zombie(0));
+				Mesh[i][j]->setToZombie(new Zombie(0));
 				num_zombies += 1;
 			}
 		}
 	}
+	return num_zombies;
+}
 
-	std::cout<<"Time"<<"\t"<<"Population"<<" Zombies:"<< num_zombies <<std::endl;
+int main(int argc, char **argv) 
+{
+
+	int i, j, n, num_zombies;
+	double aux_rand;
+	bool *locks = new bool[SIZE + 2];
+	GridCell ***MeshA, ***MeshB, ***aux;
+
+	srand48(8767134);
+
+	MeshA = (GridCell***)malloc((SIZE+2)*(sizeof(GridCell**)));
+	MeshB = (GridCell***)malloc((SIZE+2)*(sizeof(GridCell**)));
+	for (i = 0; i < SIZE + 2; i++) locks[i] = false;
 	
-	printPopulation(MeshA, 0);
+	initializeMesh(MeshA, MeshB);
+	num_zombies = fillMesh(MeshA);
+
+	std::cout<<"Time"<<"\t"<<"Population"<<" Zombies: "<< num_zombies <<std::endl;
+	printPopulation(MeshA, 1);
 	
-	for (n = 0; n < YEARS*STEPS; n++) 
+	/*
+	Main loop
+	*/
+	for (n = 1; n <= YEARS*STEPS; n++) 
 	{
-		if((n+1) % 30 == 0) printPopulation(MeshA, n+1);
+		if(n % 50 == 0) printPopulation(MeshA, n);
+		/*
+		For each timestep, calculates a new probability of
+		birth and death based on current population size.
+		Also resets the number of babies.
+		*/
+		double 	prob_birth 	= getBirthRate(MeshA)/(double)getPairingNumber(MeshA);
+		double 	prob_death 	= getDeathRate(MeshA)/(double)getPopulation(MeshA);
+		int 	babycounter = 0;
 		
-		double prob_birth = getBirthRate(MeshA)/getNumberOfPairs(MeshA);
-		double prob_death = getDeathRate(MeshA)/getPopulation(MeshA);
-
-		int babycounter = 0;
-		
-		//Parallel pragmas
+		/*
+		Parallel for loop. "babycounter" is firstprivate because each thread will count its
+		own number of babies and they have to receive an initialized value of this variable.
+		*/
 		#if defined(_OPENMP)
 		#pragma omp parallel for default(none) firstprivate(babycounter) shared(MeshA, MeshB, locks, n, prob_birth, prob_death)
 		#endif
@@ -840,11 +889,13 @@ int main(int argc, char **argv)
 
 			for (int j = 1; j <= SIZE; j++) 
 			{
-				//check for human status
+				//Place new humans in empty cells
 				if(MeshA[i][j]->isEmpty() == TRUE && babycounter > 0)
 				{
-					if(drand48() < 0.525) MeshB[i][j]->setToHuman(new Human(MALE, 0, 0));
-					else MeshB[i][j]->setToHuman(new Human(FEMALE, 0, 0));
+					if(drand48() < (NT_MALE_PERCENTAGE/100)) 
+						MeshB[i][j]->setToHuman(new Human(MALE, n, YOUNG, HEALTHY));
+					else 
+						MeshB[i][j]->setToHuman(new Human(FEMALE, n, YOUNG, HEALTHY));
 					
 					babycounter -= 1;
 					continue;
@@ -865,7 +916,8 @@ int main(int argc, char **argv)
 					}
 				}
 
-				if(MeshA[i][j]->isZombie() == TRUE) executeInfection(MeshA, i, j, n);	
+				if(MeshA[i][j]->isZombie() == TRUE) 
+					executeInfection(MeshA, i, j, n);	
 				
 				executeDeathControl(MeshA, i, j, prob_death, n);
 
@@ -885,11 +937,10 @@ int main(int argc, char **argv)
 		MeshA = aux;
 		
 		char str[100];
-
 		sprintf(str, "step%05d", n);
-
-		if(n % 30 == 0) printToBitmap(MeshA, str, SIZE+2, SIZE+2);
+		if(n % 50 == 0) printToBitmap(MeshA, str, SIZE+2, SIZE+2);
 	}
+
 	char str[100];
 	sprintf(str, "step%05d", n);
 	printToBitmap(MeshA, str, SIZE+2, SIZE+2);

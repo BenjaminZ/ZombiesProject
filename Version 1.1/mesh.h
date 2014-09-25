@@ -1,3 +1,7 @@
+/*
+File: mesh.h
+*/
+
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,13 +11,17 @@
 #include <vector>
 
 using namespace std;
-/*Northern Territory Statistics*/
+/*Northern Territory Statistics 2012*/
 #define NT_POP 235182
 #define NT_BIRTHS_PER_DAY 11.20
 #define NT_DEATHS_PER_DAY 2.84
+#define NT_YOUNG 22.6
+#define NT_ADULT 61.8
+#define NT_ELDER 15.6
+#define NT_MALE_PERCENTAGE 52.5
 
-/*Constants used*/
-#define YEARS	5
+/*Simulation parameters*/
+#define YEARS	10
 #define STEPS	365
 #define SIZE	500
 #define MOVE	0.1
@@ -27,10 +35,15 @@ using namespace std;
 #define ZOMBIE 	3
 #define EMPTY	4
 
-
-/*Human status*/
+/*Human parameters*/
 #define HEALTHY 0
 #define EXPOSED 1
 
-/*Zombies constants*/
+/*Human age modifiers*/
+#define YOUNG	0
+#define ADULT	1
+#define ELDER	2
+
+/*Zombies parameters*/
 #define INFECTION_PROB 0.8
+#define KILL_ZOMBIE 0.05
