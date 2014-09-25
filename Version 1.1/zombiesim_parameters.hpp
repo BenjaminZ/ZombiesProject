@@ -1,6 +1,9 @@
 /*
-File: mesh.h
+File: zombiesim_main.hpp
 */
+
+#ifndef __ZOMBIESIM_PARAMETERS_HPP_INCLUDED__
+#define __ZOMBIESIM_PARAMETERS_HPP_INCLUDED__
 
 #include <iostream>
 #include <stdio.h>
@@ -19,6 +22,7 @@ using namespace std;
 #define NT_ADULT 61.8
 #define NT_ELDER 15.6
 #define NT_MALE_PERCENTAGE 52.5
+#define NT_POP_DENSITY 0.171
 
 /*Simulation parameters*/
 #define YEARS	10
@@ -47,3 +51,5 @@ using namespace std;
 /*Zombies parameters*/
 #define INFECTION_PROB 0.8
 #define KILL_ZOMBIE 0.05
+
+#endif // __ZOMBIESIM_PARAMETERS_HPP_INCLUDED__
