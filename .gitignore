@@ -1,4 +1,6 @@
 .cproject
 .project
+mesh
 Mesh.h.gch
-Mesh
+.DS_Store
+mesh.dSYM

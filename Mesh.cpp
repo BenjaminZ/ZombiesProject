@@ -792,7 +792,7 @@ int main(int argc, char **argv)
 		}
 	}
 	//omp_get_thread_number();
-	srand48(8767135);
+	srand48(8767134);
 
 	for (i = 0; i < SIZE + 2; i++) locks[i] = false;
 	
@@ -820,10 +820,11 @@ int main(int argc, char **argv)
 	
 	for (n = 0; n < YEARS*STEPS; n++) 
 	{
-		if((n+1) % 30 == 0) printPopulation(MeshA, n+1);
+		if((n+1) % STEPS == 0) printPopulation(MeshA, n+1);
 		
 		double prob_birth = getBirthRate(MeshA)/getNumberOfPairs(MeshA);
 		double prob_death = getDeathRate(MeshA)/getPopulation(MeshA);
+		// double prob_birth = 0.0;
 
 		int babycounter = 0;
 		
@@ -865,7 +866,7 @@ int main(int argc, char **argv)
 					}
 				}
 
-				if(MeshA[i][j]->isZombie() == TRUE) executeInfection(MeshA, i, j, n);	
+				// if(MeshA[i][j]->isZombie() == TRUE) executeInfection(MeshA, i, j, n);	
 				
 				executeDeathControl(MeshA, i, j, prob_death, n);
 

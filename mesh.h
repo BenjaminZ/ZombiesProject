@@ -13,7 +13,7 @@ using namespace std;
 #define NT_DEATHS_PER_DAY 2.84
 
 /*Constants used*/
-#define YEARS	5
+#define YEARS	10
 #define STEPS	365
 #define SIZE	500
 #define MOVE	0.1
@@ -34,3 +34,4 @@ using namespace std;
 
 /*Zombies constants*/
 #define INFECTION_PROB 0.8
+#define KILL_ZOMBIE 0.05
