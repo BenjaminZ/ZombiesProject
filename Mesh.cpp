@@ -820,16 +820,11 @@ int main(int argc, char **argv)
 	
 	for (n = 0; n < YEARS*STEPS; n++) 
 	{
-<<<<<<< HEAD
-		if(n % 100 == 0) printPopulation(MeshA, n);
-		double prob_birth = 1.0*getBirthRate(MeshA)/getNumberOfPairs(MeshA);
-=======
 		if((n+1) % 30 == 0) printPopulation(MeshA, n+1);
 		
 		double prob_birth = getBirthRate(MeshA)/getNumberOfPairs(MeshA);
 		double prob_death = getDeathRate(MeshA)/getPopulation(MeshA);
 
->>>>>>> 2051a8eaa02917168225c19c0dcffa1c1131c9b4
 		int babycounter = 0;
 		
 		//Parallel pragmas
