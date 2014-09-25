@@ -419,7 +419,7 @@ int main(int argc, char **argv) {
 	for (n = 0; n < STEPS; n++) 
 	{
 		if(n % 100 == 0) printPopulation(MeshA, n);
-		double prob_birth = 5.1*getBirthRate(MeshA)/getNumberOfPairs(MeshA);
+		double prob_birth = 1.0*getBirthRate(MeshA)/getNumberOfPairs(MeshA);
 		int babycounter = 0;
 		
 		//Parallel pragmas
