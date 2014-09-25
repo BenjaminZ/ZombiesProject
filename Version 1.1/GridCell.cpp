@@ -62,7 +62,7 @@ int GridCell::getStatus()
 	{
 		return h->getGender();
 	}
-	if(z != NULL)
+	else if(z != NULL)
 	{
 		return ZOMBIE;
 	}

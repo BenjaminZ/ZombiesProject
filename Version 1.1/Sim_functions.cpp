@@ -70,9 +70,10 @@ void executeMovement(GridCell*** MeshA, GridCell*** MeshB, int i, int j)
 	return;
 }
 
-void executeInfection(GridCell*** MeshA, int i, int j, int n)
+void executeInfection(GridCell*** Mesh, int i, int j, int n)
 {
 	double random_num, random_inf, vector_aux, aux;
+	
 	vector<Human*> humans;
 
 	/*
@@ -81,30 +82,31 @@ void executeInfection(GridCell*** MeshA, int i, int j, int n)
 	random_inf = drand48();
 
 	if(random_inf > INFECTION_PROB) return;
-
-	if(random_inf >= 1 - KILL_ZOMBIE)
-	{
-		delete MeshA[i][j];
-		MeshA[i][j] = new GridCell();
-		return;
-	}
 	/*
 	The code below stores all possible humans to be infected.
 	*/
-	if(MeshA[i-1][j]->isHuman() == TRUE) humans.push_back(MeshA[i-1][j]->getHuman());
-	if(MeshA[i][j+1]->isHuman() == TRUE) humans.push_back(MeshA[i][j+1]->getHuman());
-	if(MeshA[i+1][j]->isHuman() == TRUE) humans.push_back(MeshA[i+1][j]->getHuman());
-	if(MeshA[i][j-1]->isHuman() == TRUE) humans.push_back(MeshA[i][j-1]->getHuman());
+	if(Mesh[i-1][j]->isHuman() == TRUE) humans.push_back(Mesh[i-1][j]->getHuman());
+	if(Mesh[i][j+1]->isHuman() == TRUE) humans.push_back(Mesh[i][j+1]->getHuman());
+	if(Mesh[i+1][j]->isHuman() == TRUE) humans.push_back(Mesh[i+1][j]->getHuman());
+	if(Mesh[i][j-1]->isHuman() == TRUE) humans.push_back(Mesh[i][j-1]->getHuman());
 
 	/*
 	No humans found nearby to be infected.
 	*/
 	if(humans.size() == 0) return;
+	
 	/*
-	Rolls a dice and checks which human gets infected.
+	Rolls a dice and checks which human gets infected or kills the zombie.
 	*/
 	else
 	{
+		if(random_inf >= (1 - KILL_ZOMBIE))
+		{
+			delete Mesh[i][j];
+			Mesh[i][j] = new GridCell();
+			return;
+		}
+
 		random_num = drand48();
 		//aux possible values: 1, 0.5, 0.33, 0.25
 		aux = 1/((double)humans.size());

@@ -39,7 +39,6 @@ void unlock(int i, bool *locks) {
 
 int main(int argc, char **argv) 
 {
-
 	int i, j, n, num_zombies;
 	double aux_rand;
 	bool *locks = new bool[SIZE + 2];
@@ -47,6 +46,11 @@ int main(int argc, char **argv)
 
 	srand48(8767134);
 
+	/*
+	Creates and initializes MeshA and MeshB.
+	Fills MeshA with the correspondent starting density of
+	humans and zombies.
+	*/
 	MeshA = (GridCell***)malloc((SIZE+2)*(sizeof(GridCell**)));
 	MeshB = (GridCell***)malloc((SIZE+2)*(sizeof(GridCell**)));
 	for (i = 0; i < SIZE + 2; i++) locks[i] = false;
@@ -54,7 +58,8 @@ int main(int argc, char **argv)
 	initializeMesh(MeshA, MeshB);
 	num_zombies = fillMesh(MeshA);
 
-	std::cout<<"Time"<<"\t"<<"Population"<<" Zombies: "<< num_zombies <<std::endl;
+	std::cout << "Time" << "\t" << "Human\tZombies" << " Starting Zombies: ";
+	std::cout << num_zombies <<std::endl;
 	printPopulation(MeshA, 1);
 	
 	/*
@@ -68,13 +73,15 @@ int main(int argc, char **argv)
 		birth and death based on current population size.
 		Also resets the number of babies.
 		*/
-		double 	prob_birth 	= getBirthRate(MeshA)/(double)getPairingNumber(MeshA);
+		//double 	prob_birth 	= getBirthRate(MeshA)/(double)getPairingNumber(MeshA);
+		double	prob_birth	= 1.97/(double)getPopulation(MeshA);
 		double 	prob_death 	= getDeathRate(MeshA)/(double)getPopulation(MeshA);
 		int 	babycounter = 0;
 		
 		/*
-		Parallel for loop. "babycounter" is firstprivate because each thread will count its
-		own number of babies and they have to receive an initialized value of this variable.
+		Parallel for loop. "babycounter" is firstprivate because each thread 
+		will count its own number of babies and they have to receive an 
+		initialized value of this variable.
 		*/
 		#if defined(_OPENMP)
 		#pragma omp parallel for default(none) firstprivate(babycounter) shared(MeshA, MeshB, locks, n, prob_birth, prob_death)
@@ -88,7 +95,9 @@ int main(int argc, char **argv)
 
 			for (int j = 1; j <= SIZE; j++) 
 			{
-				//Place new humans in empty cells
+				/*
+				Place new humans in empty cells.
+				*/
 				if(MeshA[i][j]->isEmpty() == TRUE && babycounter > 0)
 				{
 					if(drand48() < (NT_MALE_PERCENTAGE/100)) 
@@ -100,26 +109,47 @@ int main(int argc, char **argv)
 					continue;
 				}
 				
-				//For each grid cell, we do:
+				/*
+				Execute human specific actions.
+				*/
 				if(MeshA[i][j]->isHuman() == TRUE)
 				{
+					/*
+					Change a exposed human for a zombie.
+					*/
 					if(MeshA[i][j]->getHuman()->getStatus() == EXPOSED)
 					{
 						if((n - MeshA[i][j]->getHuman()->getExposedDate()) > 0)
-							MeshA[i][j]->setToZombie(new Zombie(n));
+						{
+							delete MeshA[i][j];
+							MeshA[i][j] = new GridCell();
+							MeshB[i][j]->setToZombie(new Zombie(n));
+							continue;
+						}
 					}
+					/*
+					Checks if a human will reproduce.
+					*/
 					else
 					{
 						if(executeBirthControl(MeshA, i, j, prob_birth) == TRUE)
 							babycounter ++;
 					}
 				}
-
+				/*
+				A zombie can infect one human per timestep.
+				*/
 				if(MeshA[i][j]->isZombie() == TRUE) 
 					executeInfection(MeshA, i, j, n);	
 				
+				/*
+				Humans and Zombies live for a limited lifespan.
+				*/
 				executeDeathControl(MeshA, i, j, prob_death, n);
 
+				/*
+				They can move up, down, left, right or stay in the same place.
+				*/
 				executeMovement(MeshA, MeshB, i, j);
 			}
 			#if defined(_OPENMP)
@@ -127,7 +157,7 @@ int main(int argc, char **argv)
 			#endif
 		}
 		/*End of parallel.*/
-		/*Deal with outliers*/
+		/*Deal with humans/zombies outside the grid*/
 		proccessBoundaries(MeshB);
 
 		/*Swap pointers*/
