@@ -3,7 +3,6 @@ File: Mesh_functions.cpp
 */
 
 #include "Mesh_functions.hpp"
-
 /*
 getPopulation:
 	Calculates the total population of humans.
@@ -280,10 +279,12 @@ proccessBoundaries:
 */
 void proccessBoundaries(GridCell*** Mesh)
 {
-	
-	int i, j;
+	MTRand mtwister;
+	int i = 0, j;
 	GridCell *aux;
+	double odds;
 
+	mtwister.seed(i);
 	/*
 	Top boundary
 	*/
@@ -291,75 +292,69 @@ void proccessBoundaries(GridCell*** Mesh)
 	{
 		if(Mesh[0][j]->isEmpty() == FALSE)
 		{
+			aux = Mesh[0][j];
+			Mesh[0][j] = new GridCell();
+			
 			if(Mesh[1][j]->isEmpty() == TRUE)
 			{
-				aux = Mesh[0][j];
-				Mesh[0][j] = new GridCell();
 				delete Mesh[1][j];
 				Mesh[1][j] = aux;
 			}
 			else if(j > 1 && j < SIZE)
 			{
-				if(Mesh[1][j+1]->isEmpty() == TRUE)
+				odds = mtwister.randExc();
+
+				if(odds < 0.5)
 				{
-					aux = Mesh[0][j];
-					Mesh[0][j] = new GridCell();
-					delete Mesh[1][j+1];
-					Mesh[1][j+1] = aux;
-				}
-				else if(Mesh[1][j-1]->isEmpty() == TRUE)
-				{
-					aux = Mesh[0][j];
-					Mesh[0][j] = new GridCell();
-					delete Mesh[1][j-1];
-					Mesh[1][j-1] = aux;
+					if(Mesh[1][j+1]->isEmpty() == TRUE)
+					{
+						delete Mesh[1][j+1];
+						Mesh[1][j+1] = aux;
+					}
+					else if(Mesh[1][j-1]->isEmpty() == TRUE)
+					{
+						
+						delete Mesh[1][j-1];
+						Mesh[1][j-1] = aux;
+					}
+					else delete aux;
 				}
 				else
 				{
-					/*No empty cells found. Delete it.*/
-					delete Mesh[0][j];
-					Mesh[0][j] = new GridCell();
+					if(Mesh[1][j-1]->isEmpty() == TRUE)
+					{
+						
+						delete Mesh[1][j-1];
+						Mesh[1][j-1] = aux;
+					}
+					else if(Mesh[1][j+1]->isEmpty() == TRUE)
+					{
+						delete Mesh[1][j+1];
+						Mesh[1][j+1] = aux;
+					}
+					else delete aux;
 				}
+				
 			}
 			else if(j == 1)
 			{
 				/*Checks the right of original place for empty cell*/
 				if(Mesh[1][j+1]->isEmpty() == TRUE)
 				{
-					aux = Mesh[0][j];
-					Mesh[0][j] = new GridCell();
 					delete Mesh[1][j+1];
 					Mesh[1][j+1] = aux;
 				}
-				else
-				{
-					/*No empty cells found. Delete it.*/
-					delete Mesh[0][j];
-					Mesh[0][j] = new GridCell();
-				}
+				else delete aux;
 			}
 			else if(j == SIZE)
 			{
 				/*Checks the left of original place for empty cell*/
 				if(Mesh[1][j-1]->isEmpty() == TRUE)
 				{
-					aux = Mesh[0][j];
-					Mesh[0][j] = new GridCell();
 					delete Mesh[1][j-1];
 					Mesh[1][j-1] = aux;
 				}
-				else
-				{
-					/*No empty cells found. Delete it.*/
-					delete Mesh[0][j];
-					Mesh[0][j] = new GridCell();
-				}
-			}
-			else
-			{
-				/*No empty cells found. Delete it.*/
-				delete Mesh[0][j];
-				Mesh[0][j] = new GridCell();
+				else delete aux;
 			}
 		}
 	}
@@ -371,69 +366,65 @@ void proccessBoundaries(GridCell*** Mesh)
 	{
 		if(Mesh[SIZE+1][j]->isEmpty() == FALSE)
 		{
+			aux = Mesh[SIZE+1][j];
+			Mesh[SIZE+1][j] = new GridCell();
+			
 			if(Mesh[SIZE][j]->isEmpty() == TRUE)
 			{
-				aux = Mesh[SIZE+1][j];
-				Mesh[SIZE+1][j] = new GridCell();
 				delete Mesh[SIZE][j];
 				Mesh[SIZE][j] = aux;
 			}
 			else if(j > 1 && j < SIZE)
 			{
-				if(Mesh[SIZE][j-1]->isEmpty() == TRUE)
+				odds = mtwister.randExc();
+
+				if(odds < 0.5)
 				{
-					aux = Mesh[SIZE+1][j];
-					Mesh[SIZE+1][j] = new GridCell();
-					delete Mesh[SIZE][j-1];
-					Mesh[SIZE][j-1] = aux;
-				}
-				else if(Mesh[SIZE][j+1]->isEmpty() == TRUE)
-				{
-					aux = Mesh[SIZE+1][j];
-					Mesh[SIZE+1][j] = new GridCell();
-					delete Mesh[SIZE][j+1];
-					Mesh[SIZE][j+1] = aux;
+					if(Mesh[SIZE][j-1]->isEmpty() == TRUE)
+					{
+						delete Mesh[SIZE][j-1];
+						Mesh[SIZE][j-1] = aux;
+					}
+					else if(Mesh[SIZE][j+1]->isEmpty() == TRUE)
+					{
+						delete Mesh[SIZE][j+1];
+						Mesh[SIZE][j+1] = aux;
+					}
+					else delete aux;
 				}
 				else
 				{
-					delete Mesh[SIZE+1][j];
-					Mesh[SIZE+1][j] = new GridCell();	
+					if(Mesh[SIZE][j+1]->isEmpty() == TRUE)
+					{
+						delete Mesh[SIZE][j+1];
+						Mesh[SIZE][j+1] = aux;
+					}
+					else if(Mesh[SIZE][j-1]->isEmpty() == TRUE)
+					{
+						delete Mesh[SIZE][j-1];
+						Mesh[SIZE][j-1] = aux;
+					}
+					else delete aux;
 				}
+				
 			}
 			else if(j == 1)
 			{
 				if(Mesh[SIZE][j+1]->isEmpty() == TRUE)
 				{
-					aux = Mesh[SIZE+1][j];
-					Mesh[SIZE+1][j] = new GridCell();
 					delete Mesh[SIZE][j+1];
 					Mesh[SIZE][j+1] = aux;
 				}
-				else
-				{
-					delete Mesh[SIZE+1][j];
-					Mesh[SIZE+1][j] = new GridCell();	
-				}
+				else delete aux;
 			}
 			else if(j == SIZE)
 			{
 				if(Mesh[SIZE][j-1]->isEmpty() == TRUE)
 				{
-					aux = Mesh[SIZE+1][j];
-					Mesh[SIZE+1][j] = new GridCell();
 					delete Mesh[SIZE][j-1];
 					Mesh[SIZE][j-1] = aux;
 				}
-				else
-				{
-					delete Mesh[SIZE+1][j];
-					Mesh[SIZE+1][j] = new GridCell();	
-				}
-			}
-			else
-			{
-				delete Mesh[SIZE+1][j];
-				Mesh[SIZE+1][j] = new GridCell();	
+				else delete aux;
 			}
 		}
 	}
@@ -445,69 +436,65 @@ void proccessBoundaries(GridCell*** Mesh)
 	{
 		if(Mesh[i][0]->isEmpty() == FALSE)
 		{
+			aux = Mesh[i][0];
+			Mesh[i][0] = new GridCell();
+			
 			if(Mesh[i][1]->isEmpty() == TRUE)
 			{
-				aux = Mesh[i][0];
-				Mesh[i][0] = new GridCell();
 				delete Mesh[i][1];
 				Mesh[i][1] = aux; 
 			}
-			else if(i > 1)
+			else if(i > 1 && i < SIZE)
 			{
-				if(Mesh[i-1][1]->isEmpty() == TRUE)
+				odds = mtwister.randExc();
+
+				if(odds < 0.5)
 				{
-					aux = Mesh[i][0];
-					Mesh[i][0] = new GridCell();
-					delete Mesh[i-1][1];
-					Mesh[i-1][1] = aux;
-				}
-				else if(Mesh[i+1][1]->isEmpty() == TRUE)
-				{
-					aux = Mesh[i][0];
-					Mesh[i][0] = new GridCell();
-					delete Mesh[i+1][1];
-					Mesh[i+1][1] = aux;
+					if(Mesh[i-1][1]->isEmpty() == TRUE)
+					{
+						delete Mesh[i-1][1];
+						Mesh[i-1][1] = aux;
+					}
+					else if(Mesh[i+1][1]->isEmpty() == TRUE)
+					{
+						delete Mesh[i+1][1];
+						Mesh[i+1][1] = aux;
+					}
+					else delete aux;
 				}
 				else
 				{
-					delete Mesh[i][0];
-					Mesh[i][0] = new GridCell();
+					if(Mesh[i+1][1]->isEmpty() == TRUE)
+					{
+						delete Mesh[i+1][1];
+						Mesh[i+1][1] = aux;
+					}
+					else if(Mesh[i-1][1]->isEmpty() == TRUE)
+					{
+						delete Mesh[i-1][1];
+						Mesh[i-1][1] = aux;
+					}
+					else delete aux;
 				}
+				
 			}
 			else if(i == 1)
 			{
 				if(Mesh[i-1][1]->isEmpty() == TRUE)
 				{
-					aux = Mesh[i][0];
-					Mesh[i][0] = new GridCell();
 					delete Mesh[i-1][1];
 					Mesh[i-1][1] = aux;
 				}
-				else
-				{
-					delete Mesh[i][0];
-					Mesh[i][0] = new GridCell();
-				}
+				else delete aux;
 			}
 			else if(i == SIZE)
 			{
 				if(Mesh[i+1][1]->isEmpty() == TRUE)
 				{
-					aux = Mesh[i][0];
-					Mesh[i][0] = new GridCell();
 					delete Mesh[i+1][1];
 					Mesh[i+1][1] = aux;
 				}
-				else
-				{
-					delete Mesh[i][0];
-					Mesh[i][0] = new GridCell();
-				}
-			}
-			else
-			{
-				delete Mesh[i][0];
-				Mesh[i][0] = new GridCell();
+				else delete aux;
 			}
 		}
 	}
@@ -519,69 +506,65 @@ void proccessBoundaries(GridCell*** Mesh)
 	{
 		if(Mesh[i][SIZE+1]->isEmpty() == FALSE)
 		{
+			aux = Mesh[i][SIZE+1];
+			Mesh[i][SIZE+1] = new GridCell();
+			
 			if(Mesh[i][SIZE]->isEmpty() == TRUE)
 			{
-				aux = Mesh[i][SIZE+1];
-				Mesh[i][SIZE+1] = new GridCell();
 				delete Mesh[i][SIZE];
 				Mesh[i][SIZE] = aux; 
 			}
 			else if(i > 1 && i < SIZE)
 			{
-				if(Mesh[i-1][SIZE]->isEmpty() == TRUE)
+				odds = mtwister.randExc();
+
+				if(odds < 0.5)
 				{
-					aux = Mesh[i][SIZE+1];
-					Mesh[i][SIZE+1] = new GridCell();
-					delete Mesh[i-1][SIZE];
-					Mesh[i-1][SIZE] = aux;	
-				}
-				else if(Mesh[i+1][SIZE]->isEmpty() == TRUE)
-				{
-					aux = Mesh[i][SIZE+1];
-					Mesh[i][SIZE+1] = new GridCell();
-					delete Mesh[i+1][SIZE];
-					Mesh[i+1][SIZE] = aux;
+					if(Mesh[i-1][SIZE]->isEmpty() == TRUE)
+					{
+						delete Mesh[i-1][SIZE];
+						Mesh[i-1][SIZE] = aux;	
+					}
+					else if(Mesh[i+1][SIZE]->isEmpty() == TRUE)
+					{
+						delete Mesh[i+1][SIZE];
+						Mesh[i+1][SIZE] = aux;
+					}
+					else delete aux;
 				}
 				else
 				{
-					delete Mesh[i][SIZE+1];
-					Mesh[i][SIZE+1] = new GridCell();
+					if(Mesh[i+1][SIZE]->isEmpty() == TRUE)
+					{
+						delete Mesh[i+1][SIZE];
+						Mesh[i+1][SIZE] = aux;
+					}
+					else if(Mesh[i-1][SIZE]->isEmpty() == TRUE)
+					{
+						delete Mesh[i-1][SIZE];
+						Mesh[i-1][SIZE] = aux;	
+					}
+					else delete aux;
 				}
+				
 			}
 			else if(i == 1)
 			{
 				if(Mesh[i+1][SIZE]->isEmpty() == TRUE)
 				{
-					aux = Mesh[i][SIZE+1];
-					Mesh[i][SIZE+1] = new GridCell();
 					delete Mesh[i+1][SIZE];
 					Mesh[i+1][SIZE] = aux;
 				}
-				else
-				{
-					delete Mesh[i][SIZE+1];
-					Mesh[i][SIZE+1] = new GridCell();
-				}
+				else delete aux;
 			}
 			else if(i == SIZE)
 			{
 				if(Mesh[i-1][SIZE]->isEmpty() == TRUE)
 				{
-					aux = Mesh[i][SIZE+1];
-					Mesh[i][SIZE+1] = new GridCell();
 					delete Mesh[i-1][SIZE];
 					Mesh[i-1][SIZE] = aux;	
 				}
-				else
-				{
-					delete Mesh[i][SIZE+1];
-					Mesh[i][SIZE+1] = new GridCell();
-				}
-			}
-			else
-			{
-				delete Mesh[i][SIZE+1];
-				Mesh[i][SIZE+1] = new GridCell();
+				else delete aux;
 			}
 		}
 	}
