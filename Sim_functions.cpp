@@ -33,6 +33,9 @@ int executeBirthControl(GridCell*** MeshA, int i, int j, double prob_birth, MTRa
 
 void executeMovement(GridCell*** MeshA, GridCell*** MeshB, int i, int j, MTRand* mtwister)
 {
+	/*
+	Checks if cell is not empty.
+	*/
 	if(MeshA[i][j]->isEmpty() == FALSE) 
 	{ 
 		GridCell* aux_cell = MeshA[i][j];
@@ -41,26 +44,41 @@ void executeMovement(GridCell*** MeshA, GridCell*** MeshB, int i, int j, MTRand*
 
 		double move = mtwister->randExc();
 
-		if (move < 1.0*MOVE && MeshA[i-1][j]->isEmpty() == TRUE && MeshB[i-1][j]->isEmpty() == TRUE) 
+		/*
+		Move up
+		*/
+		if(move < 1.0*MOVE && MeshA[i-1][j]->isEmpty() == TRUE && MeshB[i-1][j]->isEmpty() == TRUE) 
 		{
 			delete MeshB[i-1][j];
 			MeshB[i-1][j] = aux_cell;
 		} 
-		else if (move < 2.0*MOVE && MeshA[i+1][j]->isEmpty() == TRUE && MeshB[i+1][j]->isEmpty() == TRUE) 
+		/*
+		Move down
+		*/
+		else if(move < 2.0*MOVE && MeshA[i+1][j]->isEmpty() == TRUE && MeshB[i+1][j]->isEmpty() == TRUE) 
 		{
 			delete MeshB[i+1][j];
 			MeshB[i+1][j] = aux_cell;
 		} 
-		else if (move < 3.0*MOVE && MeshA[i][j-1]->isEmpty() == TRUE && MeshB[i][j-1]->isEmpty() == TRUE) 
+		/*
+		Move left
+		*/
+		else if(move < 3.0*MOVE && MeshA[i][j-1]->isEmpty() == TRUE && MeshB[i][j-1]->isEmpty() == TRUE) 
 		{
 			delete MeshB[i][j-1];
 			MeshB[i][j-1] = aux_cell;
 		} 
-		else if (move < 4.0*MOVE && MeshA[i][j+1]->isEmpty() == TRUE && MeshB[i][j+1]->isEmpty() == TRUE) 
+		/*
+		Move right
+		*/
+		else if(move < 4.0*MOVE && MeshA[i][j+1]->isEmpty() == TRUE && MeshB[i][j+1]->isEmpty() == TRUE) 
 		{
 			delete MeshB[i][j+1];
 			MeshB[i][j+1] = aux_cell;
 		}
+		/*
+		Does not move
+		*/
 		else 
 		{
 			delete MeshB[i][j];
