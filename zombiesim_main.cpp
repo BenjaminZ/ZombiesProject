@@ -52,7 +52,7 @@ int main(int argc, char **argv)
 	/*
 	Initializes the MersenneTwister PRNG.
 	*/
-	for(i = 0; i < 64; i++) mt_thread->seed(i);
+	for(i = 0; i < 64; i++) mt_thread[i].seed(i);
 	/*
 	Creates and initializes MeshA and MeshB.
 	Fills MeshA with the correspondent starting density of
@@ -82,7 +82,8 @@ int main(int argc, char **argv)
 		Also resets the number of babies.
 		*/
 		//double 	prob_birth 	= getBirthRate(MeshA)/(double)getPairingNumber(MeshA);
-		double	prob_birth	= 1.97/(double)getPopulation(MeshA);
+		//double	prob_birth	= 1.97/(double)getPopulation(MeshA);
+		double	prob_birth 	= 0.0;
 		double 	prob_death 	= getDeathRate(MeshA)/(double)getPopulation(MeshA);
 		int 	babycounter = 0;
 		
