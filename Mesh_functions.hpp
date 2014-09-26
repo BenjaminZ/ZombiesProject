@@ -5,6 +5,7 @@ File: Mesh_functions.hpp
 #ifndef __MESH_FUNCTIONS_HPP_INCLUDED__
 #define __MESH_FUNCTIONS_HPP_INCLUDED__
 
+#include "MersenneTwister.h"
 #include "zombiesim_parameters.hpp"
 #include "Zombie.hpp"
 #include "Human.hpp"
@@ -24,7 +25,7 @@ void proccessBoundaries(GridCell***);
 
 void initializeMesh(GridCell***, GridCell***);
 
-int fillMesh(GridCell***);
+int fillMesh(GridCell***, MTRand*);
 
 void printToBitmap(GridCell***, char*, int, int);
 

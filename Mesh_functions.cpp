@@ -4,15 +4,26 @@ File: Mesh_functions.cpp
 
 #include "Mesh_functions.hpp"
 
+/*
+getPopulation:
+	Calculates the total population of humans.
+*/
 int getPopulation(GridCell*** Mesh)
 {
 	int populationTotal = 0;
 	for (int i = 1; i <= SIZE; i++) 
 		for (int j = 1; j <= SIZE; j++)
-			if (Mesh[i][j]->isEmpty() == FALSE) populationTotal++;
+			if (Mesh[i][j]->isHuman() == TRUE) populationTotal++;
 	return populationTotal;
 }
 
+/*
+Legacy function:
+	calculates the amount of possible existent pairs in the grid.
+	Problems:
+		if the human population size decreases drastically and humans get
+		clustered, there will be a "boom" of babies.
+*/
 double getPairingNumber(GridCell*** Mesh)
 {
 	int i, j;
@@ -42,41 +53,244 @@ double getPairingNumber(GridCell*** Mesh)
 	if(pob_male > pob_female) return pob_female;
 	else return pob_male;
 }
-
+/*
+getBirthRate:
+	adjusts the NT birth rate to the current grid population.
+*/
 double getBirthRate(GridCell*** Mesh)
 {
 	return ((double)getPopulation(Mesh))*(NT_BIRTHS_PER_DAY)/(NT_POP);
 }
 
+/*
+getDeathRate:
+	adjusts the NT death rate to the current grid population.
+*/
 double getDeathRate(GridCell*** Mesh)
 {
 	return ((double)getPopulation(Mesh))*(NT_DEATHS_PER_DAY)/(NT_POP);
 }
 
+/*
+printPopulation:
+	Print current population of humans and zombies.
+*/
 void printPopulation(GridCell*** Mesh, int t) 
 {
-	int populationTotal = 0;
-	for (int i = 1; i <= SIZE; i++) 
+	int male = 0, female = 0, zombies = 0;
+	for (int i = 1; i <= SIZE; i++)
+	{
 		for (int j = 1; j <= SIZE; j++)
-			if (Mesh[i][j]->isHuman() == TRUE) populationTotal++;
+		{
+			if (Mesh[i][j]->isHuman() == TRUE)
+			{
+				if(Mesh[i][j]->getHuman()->getGender() == MALE) male++;
+				else female++;
+			}
+			else if(Mesh[i][j]->isZombie() == TRUE) zombies++;
+		}
+	}
 
-	cout << t << "\t" << populationTotal << std::endl;
+	cout << t << "\t" << male << "\t" << female << "\t" << zombies << std::endl;
 	return;
 }
 
+/*
+initializeMesh:
+	create all GridCell objects that initially represents empty cells.
+*/
+void initializeMesh(GridCell*** MeshA, GridCell*** MeshB)
+{
+	int i, j;
+
+	for(i = 0; i < SIZE+2; i++)
+	{
+		MeshA[i] = (GridCell**)malloc((SIZE+2)*(sizeof(GridCell*)));
+		MeshB[i] = (GridCell**)malloc((SIZE+2)*(sizeof(GridCell*)));
+	}
+	
+	for(i = 0; i < SIZE+2; i++)
+	{
+		for(j = 0; j < SIZE+2; j++)
+		{
+			MeshA[i][j] = new GridCell();
+			MeshB[i][j] = new GridCell();
+		}
+	}
+	return;
+}
+
+/*
+fillMesh:
+	this function creates all initial humans/zombies in the mesh.
+	The parameters can be changed in "zombiesim_parameters.hpp".
+*/
+int fillMesh(GridCell*** Mesh, MTRand* mtwister)
+{
+	int i, j, num_zombies;
+	double aux_rand;
+	int gender, age, agemodifier, birthdate;
+
+	for (num_zombies = 0, i = 1; i <= SIZE; i++)
+	{ 
+		for (j = 1; j <= SIZE; j++)
+		{
+			aux_rand = mtwister->randExc();
+			
+			if (aux_rand < NT_POP_DENSITY)
+			{	
+				/*
+				Define gender.
+				*/			
+				if(mtwister->randExc() < (NT_MALE_PERCENTAGE/100)) gender = MALE;
+				else gender = FEMALE;
+
+				/*
+				Define age group.
+				*/
+				aux_rand = mtwister->randExc();
+				if(aux_rand < (NT_YOUNG/100)) agemodifier = YOUNG;
+				else if(aux_rand < (NT_ADULT/100)) agemodifier = ADULT;
+				else agemodifier = ELDER;
+
+				/*
+				Define age (in steps)
+				*/
+
+				/*
+				Creates human.
+				*/
+				Mesh[i][j]->setToHuman(new Human(gender, 0, agemodifier, HEALTHY));
+			}
+			/*
+			This establishes a probability of having 2 zombies.
+			*/
+			else if(aux_rand < NT_POP_DENSITY + (NUM_OF_ZOMBIES/(SIZE*SIZE)))
+			{
+				Mesh[i][j]->setToZombie(new Zombie(0));
+				num_zombies += 1;
+			}
+		}
+	}
+	return num_zombies;
+}
+
+/*
+Function extracted and adapted from:
+http://stackoverflow.com/questions/2654480/writing-bmp-image-in-pure-c-c-without-other-libraries
+Credits to: http://stackoverflow.com/users/318726/deusmacabre
+*/
+void printToBitmap(GridCell*** Mesh, char* str, int w, int h)
+{
+	FILE *f;
+	unsigned char *img = NULL;
+	int r, g, b, red[w][h], green[w][h], blue[w][h];
+	int x, y;
+	int filesize = 54 + 3*w*h;
+	
+	img = (unsigned char *)malloc(3*w*h);
+	memset(img,0,sizeof(img));
+
+	for(int i = 0; i < w; i++)
+	{
+		for(int j = 0; j< h; j++)
+		{
+				switch(Mesh[i][j]->getStatus())
+				{
+					case MALE:
+						red[i][j] = 0;
+						green[i][j] = 0;
+						blue[i][j] = 255;
+						break;
+					case FEMALE:
+						red[i][j] = 0;
+						green[i][j] = 255;
+						blue[i][j] = 0;
+						break;
+					case ZOMBIE:
+						red[i][j] = 255;
+						green[i][j] = 0;
+						blue[i][j] = 0;
+						break;
+					default:
+						red[i][j] = 255;
+						green[i][j] = 255;
+						blue[i][j] = 255;
+						break;
+				}
+		}
+	}
+
+	for(int i = 0; i < w; i++)
+	{
+	    for(int j = 0; j < h; j++)
+		{
+		    x = i; 
+		    y = (h-1)-j;
+		    r = red[i][j]*255;
+		    g = green[i][j]*255;
+		    b = blue[i][j]*255;
+		    if (r > 255) r = 255;
+		    if (g > 255) g = 255;
+		    if (b > 255) b = 255;
+		    img[(x+y*w)*3+2] = (unsigned char)(r);
+		    img[(x+y*w)*3+1] = (unsigned char)(g);
+		    img[(x+y*w)*3+0] = (unsigned char)(b);
+		}
+	}
+
+	unsigned char bmpfileheader[14] = {'B','M', 0,0,0,0, 0,0, 0,0, 54,0,0,0};
+	unsigned char bmpinfoheader[40] = {40,0,0,0, 0,0,0,0, 0,0,0,0, 1,0, 24,0};
+	unsigned char bmppad[3] 		= {0,0,0};
+
+	bmpfileheader[ 2] = (unsigned char)(filesize    );
+	bmpfileheader[ 3] = (unsigned char)(filesize>> 8);
+	bmpfileheader[ 4] = (unsigned char)(filesize>>16);
+	bmpfileheader[ 5] = (unsigned char)(filesize>>24);
+
+	bmpinfoheader[ 4] = (unsigned char)(       w    );
+	bmpinfoheader[ 5] = (unsigned char)(       w>> 8);
+	bmpinfoheader[ 6] = (unsigned char)(       w>>16);
+	bmpinfoheader[ 7] = (unsigned char)(       w>>24);
+	bmpinfoheader[ 8] = (unsigned char)(       h    );
+	bmpinfoheader[ 9] = (unsigned char)(       h>> 8);
+	bmpinfoheader[10] = (unsigned char)(       h>>16);
+	bmpinfoheader[11] = (unsigned char)(       h>>24);
+
+	f = fopen(str,"wb");
+	fwrite(bmpfileheader, 1, 14, f);
+	fwrite(bmpinfoheader, 1, 40, f);
+	
+	for(int i = 0; i < h; i++)
+	{
+	    fwrite(img+(w*(h-i-1)*3),3,w,f);
+	    fwrite(bmppad,1,(4-(w*3)%4)%4,f);
+	}
+	
+	fclose(f);
+
+	return;
+}
+
+/*
+proccessBoundaries:
+	Triple No-Flux based boundary. 
+	Checks a minimum of 2 and a maximum of 3 cells for empty places and 
+	re-inserts the human/zombie back in the mesh.
+*/
 void proccessBoundaries(GridCell*** Mesh)
 {
-	/*No-Flux based boundary*/
+	
 	int i, j;
 	GridCell *aux;
 
-	/*Top boundary*/
+	/*
+	Top boundary
+	*/
 	for(j = 1; j < SIZE+1; j++)
 	{
-		/*Found a human/zombie outside the grid*/
 		if(Mesh[0][j]->isEmpty() == FALSE)
 		{
-			/*If the original place is empty, put it back*/
 			if(Mesh[1][j]->isEmpty() == TRUE)
 			{
 				aux = Mesh[0][j];
@@ -86,7 +300,6 @@ void proccessBoundaries(GridCell*** Mesh)
 			}
 			else if(j > 1 && j < SIZE)
 			{
-				/*Checks the left and right of original place for empty cells*/
 				if(Mesh[1][j+1]->isEmpty() == TRUE)
 				{
 					aux = Mesh[0][j];
@@ -150,13 +363,14 @@ void proccessBoundaries(GridCell*** Mesh)
 			}
 		}
 	}
-	/*Bottom boundary*/
+	
+	/*
+	Bottom boundary
+	*/
 	for(j = 1; j < SIZE+1; j++)
 	{
-		/*Found a human/zombie outside the grid*/
 		if(Mesh[SIZE+1][j]->isEmpty() == FALSE)
 		{
-			/*If the original place is empty, put it back*/
 			if(Mesh[SIZE][j]->isEmpty() == TRUE)
 			{
 				aux = Mesh[SIZE+1][j];
@@ -223,13 +437,14 @@ void proccessBoundaries(GridCell*** Mesh)
 			}
 		}
 	}
-	/*Left boundary*/
+	
+	/*
+	Left boundary
+	*/
 	for(i = 1; i < SIZE+1; i++)
 	{
-		/*Found a human/zombie outside the grid*/
 		if(Mesh[i][0]->isEmpty() == FALSE)
 		{
-			/*If the original place is empty, put it back*/
 			if(Mesh[i][1]->isEmpty() == TRUE)
 			{
 				aux = Mesh[i][0];
@@ -296,7 +511,10 @@ void proccessBoundaries(GridCell*** Mesh)
 			}
 		}
 	}
-	/*Right boundary*/
+	
+	/*
+	Right boundary
+	*/
 	for(i = 1; i < SIZE+1; i++)
 	{
 		if(Mesh[i][SIZE+1]->isEmpty() == FALSE)
@@ -367,166 +585,5 @@ void proccessBoundaries(GridCell*** Mesh)
 			}
 		}
 	}
-	return;
-}
-
-void initializeMesh(GridCell*** MeshA, GridCell*** MeshB)
-{
-	int i, j;
-
-	for(i = 0; i < SIZE+2; i++)
-	{
-		MeshA[i] = (GridCell**)malloc((SIZE+2)*(sizeof(GridCell*)));
-		MeshB[i] = (GridCell**)malloc((SIZE+2)*(sizeof(GridCell*)));
-	}
-	
-	for(i = 0; i < SIZE+2; i++)
-	{
-		for(j = 0; j < SIZE+2; j++)
-		{
-			MeshA[i][j] = new GridCell();
-			MeshB[i][j] = new GridCell();
-		}
-	}
-	return;
-}
-
-int fillMesh(GridCell*** Mesh)
-{
-	int i, j, num_zombies;
-	double aux_rand;
-	int gender, age, agemodifier, birthdate;
-
-	for (num_zombies = 0, i = 1; i <= SIZE; i++)
-	{ 
-		for (j = 1; j <= SIZE; j++)
-		{
-			aux_rand = drand48();
-			
-			if (aux_rand < NT_POP_DENSITY)
-			{	
-				/*
-				Define gender.
-				*/			
-				if(drand48() < (NT_MALE_PERCENTAGE/100)) gender = MALE;
-				else gender = FEMALE;
-
-				/*
-				Define age group.
-				*/
-				aux_rand = drand48();
-				if(aux_rand < (NT_YOUNG/100)) agemodifier = YOUNG;
-				else if(aux_rand < (NT_ADULT/100)) agemodifier = ADULT;
-				else agemodifier = ELDER;
-
-				/*
-				Define age (in steps)
-				*/
-
-				/*
-				Creates human.
-				*/
-				Mesh[i][j]->setToHuman(new Human(gender, 0, agemodifier, HEALTHY));
-			}
-			else if(aux_rand >= 0.999992)
-			{
-				Mesh[i][j]->setToZombie(new Zombie(0));
-				num_zombies += 1;
-			}
-		}
-	}
-	return num_zombies;
-}
-
-void printToBitmap(GridCell*** Mesh, char* str, int w, int h)
-{
-	FILE *f;
-	unsigned char *img = NULL;
-	int r, g, b, red[w][h], green[w][h], blue[w][h];
-	int x, y;
-	int filesize = 54 + 3*w*h;  //w is your image width, h is image height, both int
-	if( img )
-	    free( img );
-	img = (unsigned char *)malloc(3*w*h);
-	memset(img,0,sizeof(img));
-
-	for(int i= 0; i<w; i++)
-	{
-		for(int j=0; j<h; j++)
-		{
-				switch(Mesh[i][j]->getStatus())
-				{
-					case MALE:
-						red[i][j] = 0;
-						green[i][j] = 0;
-						blue[i][j] = 255;
-						break;
-					case FEMALE:
-						red[i][j] = 0;
-						green[i][j] = 255;
-						blue[i][j] = 0;
-						break;
-					case ZOMBIE:
-						red[i][j] = 255;
-						green[i][j] = 0;
-						blue[i][j] = 0;
-						break;
-					default:
-						red[i][j] = 255;
-						green[i][j] = 255;
-						blue[i][j] = 255;
-						break;
-				}
-		}
-	}
-
-	for(int i = 0; i < w; i++)
-	{
-	    for(int j = 0; j < h; j++)
-		{
-		    x = i; 
-		    y = (h-1)-j;
-		    r = red[i][j]*255;
-		    g = green[i][j]*255;
-		    b = blue[i][j]*255;
-		    if (r > 255) r = 255;
-		    if (g > 255) g = 255;
-		    if (b > 255) b = 255;
-		    img[(x+y*w)*3+2] = (unsigned char)(r);
-		    img[(x+y*w)*3+1] = (unsigned char)(g);
-		    img[(x+y*w)*3+0] = (unsigned char)(b);
-		}
-	}
-
-	unsigned char bmpfileheader[14] = {'B','M', 0,0,0,0, 0,0, 0,0, 54,0,0,0};
-	unsigned char bmpinfoheader[40] = {40,0,0,0, 0,0,0,0, 0,0,0,0, 1,0, 24,0};
-	unsigned char bmppad[3] = {0,0,0};
-
-	bmpfileheader[ 2] = (unsigned char)(filesize    );
-	bmpfileheader[ 3] = (unsigned char)(filesize>> 8);
-	bmpfileheader[ 4] = (unsigned char)(filesize>>16);
-	bmpfileheader[ 5] = (unsigned char)(filesize>>24);
-
-	bmpinfoheader[ 4] = (unsigned char)(       w    );
-	bmpinfoheader[ 5] = (unsigned char)(       w>> 8);
-	bmpinfoheader[ 6] = (unsigned char)(       w>>16);
-	bmpinfoheader[ 7] = (unsigned char)(       w>>24);
-	bmpinfoheader[ 8] = (unsigned char)(       h    );
-	bmpinfoheader[ 9] = (unsigned char)(       h>> 8);
-	bmpinfoheader[10] = (unsigned char)(       h>>16);
-	bmpinfoheader[11] = (unsigned char)(       h>>24);
-
-	f = fopen(str,"wb");
-	fwrite(bmpfileheader, 1, 14, f);
-	fwrite(bmpinfoheader, 1, 40, f);
-	
-	for(int i = 0; i < h; i++)
-	{
-	    fwrite(img+(w*(h-i-1)*3),3,w,f);
-	    fwrite(bmppad,1,(4-(w*3)%4)%4,f);
-	}
-	
-	fclose(f);
-
 	return;
 }
