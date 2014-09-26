@@ -1,45 +1,45 @@
 /*
 File: Sim_functions.hpp
 */
-
 #include "Sim_functions.hpp"
 
-int executeBirthControl(GridCell*** MeshA, int i, int j, double prob_birth)
+int executeBirthControl(GridCell*** MeshA, int i, int j, double prob_birth, MTRand* mtwister)
 {
 	int foundPair;
 	int checked;
 	double prob;
-	//Grid cells with distance higher than 0 from boundary
-	prob = (double)drand48();
-	//Center cells
-	if(MeshA[i][j]->getStatus() == MALE)
-	{
-		if(MeshA[i-1][j]->getStatus() == FEMALE || MeshA[i][j+1]->getStatus() == FEMALE || 
-			MeshA[i+1][j]->getStatus() == FEMALE || MeshA[i][j-1]->getStatus() == FEMALE)
-		{
-			
-			if(prob < prob_birth) return TRUE;
-		}
-	}
+
+	prob = mtwister->randExc();
+
+	if(prob > prob_birth) return FALSE;
+
 	else
 	{
-		if(MeshA[i-1][j]->getStatus() == MALE || MeshA[i][j+1]->getStatus() == MALE || 
-			MeshA[i+1][j]->getStatus() == MALE || MeshA[i][j-1]->getStatus() == MALE)
+		if(MeshA[i][j]->getStatus() == MALE)
 		{
-			if(prob < prob_birth) return TRUE;
+			if(MeshA[i-1][j]->getStatus() == FEMALE || MeshA[i][j+1]->getStatus() == FEMALE || 
+				MeshA[i+1][j]->getStatus() == FEMALE || MeshA[i][j-1]->getStatus() == FEMALE)
+				return TRUE;
+		}
+		else
+		{
+			if(MeshA[i-1][j]->getStatus() == MALE || MeshA[i][j+1]->getStatus() == MALE || 
+				MeshA[i+1][j]->getStatus() == MALE || MeshA[i][j-1]->getStatus() == MALE)
+				return TRUE;
 		}
 	}
 	return FALSE;
 }
 
-void executeMovement(GridCell*** MeshA, GridCell*** MeshB, int i, int j)
+void executeMovement(GridCell*** MeshA, GridCell*** MeshB, int i, int j, MTRand* mtwister)
 {
 	if(MeshA[i][j]->isEmpty() == FALSE) 
 	{ 
-		GridCell *aux_cell = MeshA[i][j];
+		GridCell* aux_cell = MeshA[i][j];
+
 		MeshA[i][j] = new GridCell();
 
-		double move = drand48();
+		double move = mtwister->randExc();
 
 		if (move < 1.0*MOVE && MeshA[i-1][j]->isEmpty() == TRUE && MeshB[i-1][j]->isEmpty() == TRUE) 
 		{
@@ -70,18 +70,18 @@ void executeMovement(GridCell*** MeshA, GridCell*** MeshB, int i, int j)
 	return;
 }
 
-void executeInfection(GridCell*** Mesh, int i, int j, int n)
+void executeInfection(GridCell*** Mesh, int i, int j, int n, MTRand* mtwister)
 {
 	double random_num, random_inf, vector_aux, aux;
 	
 	vector<Human*> humans;
 
 	/*
-	This checks if the zombie will infect someone.
+	This checks if the zombie will infect someone or get himself killed
 	*/
-	random_inf = drand48();
-
-	if(random_inf > INFECTION_PROB) return;
+	random_inf = mtwister->randExc();
+	if(random_inf > INFECTION_PROB && random_inf < 1 - KILL_ZOMBIE) return;
+	
 	/*
 	The code below stores all possible humans to be infected.
 	*/
@@ -91,7 +91,7 @@ void executeInfection(GridCell*** Mesh, int i, int j, int n)
 	if(Mesh[i][j-1]->isHuman() == TRUE) humans.push_back(Mesh[i][j-1]->getHuman());
 
 	/*
-	No humans found nearby to be infected.
+	No humans found nearby to be infected or to kill the zombie.
 	*/
 	if(humans.size() == 0) return;
 	
@@ -100,6 +100,9 @@ void executeInfection(GridCell*** Mesh, int i, int j, int n)
 	*/
 	else
 	{
+		/*
+		Kills a zombie.
+		*/
 		if(random_inf >= (1 - KILL_ZOMBIE))
 		{
 			delete Mesh[i][j];
@@ -107,10 +110,15 @@ void executeInfection(GridCell*** Mesh, int i, int j, int n)
 			return;
 		}
 
-		random_num = drand48();
-		//aux possible values: 1, 0.5, 0.33, 0.25
+		random_num = mtwister->randExc();
+		/*
+		aux possible values: 1, 0.5, 0.33, 0.25
+		*/
 		aux = 1/((double)humans.size());
 
+		/*
+		Chooses who to infect.
+		*/
 		for(i = 0, vector_aux = aux; i < humans.size(); i++)
 		{
 			if(random_num < vector_aux)
@@ -129,13 +137,13 @@ void executeInfection(GridCell*** Mesh, int i, int j, int n)
 	return;
 }
 
-void executeDeathControl(GridCell*** Mesh, int i, int j, double prob_death, int n)
+void executeDeathControl(GridCell*** Mesh, int i, int j, double prob_death, int n, MTRand* mtwister)
 {
 	double prob_kill;
 
 	if(Mesh[i][j]->isHuman() == TRUE)
 	{
-		prob_kill = drand48();
+		prob_kill = mtwister->randExc();
 
 		if(prob_kill < prob_death)
 		{
@@ -143,7 +151,7 @@ void executeDeathControl(GridCell*** Mesh, int i, int j, double prob_death, int 
 			Mesh[i][j] = new GridCell();
 		}
 	}
-	if(Mesh[i][j]->isZombie() == TRUE)
+	else if(Mesh[i][j]->isZombie() == TRUE)
 	{
 		if((n - Mesh[i][j]->getZombie()->getTurningDate()) > 4*365)
 		{

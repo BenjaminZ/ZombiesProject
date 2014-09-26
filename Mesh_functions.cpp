@@ -4,9 +4,9 @@ File: Mesh_functions.cpp
 
 #include "Mesh_functions.hpp"
 
-
 /*
-Calculates the total population
+getPopulation:
+	Calculates the total population of humans.
 */
 int getPopulation(GridCell*** Mesh)
 {
@@ -53,36 +53,52 @@ double getPairingNumber(GridCell*** Mesh)
 	if(pob_male > pob_female) return pob_female;
 	else return pob_male;
 }
-
+/*
+getBirthRate:
+	adjusts the NT birth rate to the current grid population.
+*/
 double getBirthRate(GridCell*** Mesh)
 {
 	return ((double)getPopulation(Mesh))*(NT_BIRTHS_PER_DAY)/(NT_POP);
 }
 
+/*
+getDeathRate:
+	adjusts the NT death rate to the current grid population.
+*/
 double getDeathRate(GridCell*** Mesh)
 {
 	return ((double)getPopulation(Mesh))*(NT_DEATHS_PER_DAY)/(NT_POP);
 }
 
 /*
-Print current population of humans and zombies.
+printPopulation:
+	Print current population of humans and zombies.
 */
 void printPopulation(GridCell*** Mesh, int t) 
 {
-	int humans = 0, zombies = 0;
+	int male = 0, female = 0, zombies = 0;
 	for (int i = 1; i <= SIZE; i++)
 	{
 		for (int j = 1; j <= SIZE; j++)
 		{
-			if (Mesh[i][j]->isHuman() == TRUE) humans++;
+			if (Mesh[i][j]->isHuman() == TRUE)
+			{
+				if(Mesh[i][j]->getHuman()->getGender() == MALE) male++;
+				else female++;
+			}
 			else if(Mesh[i][j]->isZombie() == TRUE) zombies++;
 		}
 	}
 
-	cout << t << "\t" << humans << "\t" << zombies << std::endl;
+	cout << t << "\t" << male << "\t" << female << "\t" << zombies << std::endl;
 	return;
 }
 
+/*
+initializeMesh:
+	create all GridCell objects that initially represents empty cells.
+*/
 void initializeMesh(GridCell*** MeshA, GridCell*** MeshB)
 {
 	int i, j;
@@ -104,7 +120,12 @@ void initializeMesh(GridCell*** MeshA, GridCell*** MeshB)
 	return;
 }
 
-int fillMesh(GridCell*** Mesh)
+/*
+fillMesh:
+	this function creates all initial humans/zombies in the mesh.
+	The parameters can be changed in "zombiesim_parameters.hpp".
+*/
+int fillMesh(GridCell*** Mesh, MTRand* mtwister)
 {
 	int i, j, num_zombies;
 	double aux_rand;
@@ -114,20 +135,20 @@ int fillMesh(GridCell*** Mesh)
 	{ 
 		for (j = 1; j <= SIZE; j++)
 		{
-			aux_rand = drand48();
+			aux_rand = mtwister->randExc();
 			
 			if (aux_rand < NT_POP_DENSITY)
 			{	
 				/*
 				Define gender.
 				*/			
-				if(drand48() < (NT_MALE_PERCENTAGE/100)) gender = MALE;
+				if(mtwister->randExc() < (NT_MALE_PERCENTAGE/100)) gender = MALE;
 				else gender = FEMALE;
 
 				/*
 				Define age group.
 				*/
-				aux_rand = drand48();
+				aux_rand = mtwister->randExc();
 				if(aux_rand < (NT_YOUNG/100)) agemodifier = YOUNG;
 				else if(aux_rand < (NT_ADULT/100)) agemodifier = ADULT;
 				else agemodifier = ELDER;
@@ -144,7 +165,7 @@ int fillMesh(GridCell*** Mesh)
 			/*
 			This establishes a probability of having 2 zombies.
 			*/
-			else if(aux_rand >= 0.999992)
+			else if(aux_rand < NT_POP_DENSITY + (NUM_OF_ZOMBIES/(SIZE*SIZE)))
 			{
 				Mesh[i][j]->setToZombie(new Zombie(0));
 				num_zombies += 1;
@@ -167,14 +188,12 @@ void printToBitmap(GridCell*** Mesh, char* str, int w, int h)
 	int x, y;
 	int filesize = 54 + 3*w*h;
 	
-	if( img )
-	    free( img );
 	img = (unsigned char *)malloc(3*w*h);
 	memset(img,0,sizeof(img));
 
-	for(int i= 0; i<w; i++)
+	for(int i = 0; i < w; i++)
 	{
-		for(int j=0; j<h; j++)
+		for(int j = 0; j< h; j++)
 		{
 				switch(Mesh[i][j]->getStatus())
 				{
@@ -222,7 +241,7 @@ void printToBitmap(GridCell*** Mesh, char* str, int w, int h)
 
 	unsigned char bmpfileheader[14] = {'B','M', 0,0,0,0, 0,0, 0,0, 54,0,0,0};
 	unsigned char bmpinfoheader[40] = {40,0,0,0, 0,0,0,0, 0,0,0,0, 1,0, 24,0};
-	unsigned char bmppad[3] = {0,0,0};
+	unsigned char bmppad[3] 		= {0,0,0};
 
 	bmpfileheader[ 2] = (unsigned char)(filesize    );
 	bmpfileheader[ 3] = (unsigned char)(filesize>> 8);
@@ -253,19 +272,25 @@ void printToBitmap(GridCell*** Mesh, char* str, int w, int h)
 	return;
 }
 
+/*
+proccessBoundaries:
+	Triple No-Flux based boundary. 
+	Checks a minimum of 2 and a maximum of 3 cells for empty places and 
+	re-inserts the human/zombie back in the mesh.
+*/
 void proccessBoundaries(GridCell*** Mesh)
 {
-	/*No-Flux based boundary*/
+	
 	int i, j;
 	GridCell *aux;
 
-	/*Top boundary*/
+	/*
+	Top boundary
+	*/
 	for(j = 1; j < SIZE+1; j++)
 	{
-		/*Found a human/zombie outside the grid*/
 		if(Mesh[0][j]->isEmpty() == FALSE)
 		{
-			/*If the original place is empty, put it back*/
 			if(Mesh[1][j]->isEmpty() == TRUE)
 			{
 				aux = Mesh[0][j];
@@ -275,7 +300,6 @@ void proccessBoundaries(GridCell*** Mesh)
 			}
 			else if(j > 1 && j < SIZE)
 			{
-				/*Checks the left and right of original place for empty cells*/
 				if(Mesh[1][j+1]->isEmpty() == TRUE)
 				{
 					aux = Mesh[0][j];
@@ -339,13 +363,14 @@ void proccessBoundaries(GridCell*** Mesh)
 			}
 		}
 	}
-	/*Bottom boundary*/
+	
+	/*
+	Bottom boundary
+	*/
 	for(j = 1; j < SIZE+1; j++)
 	{
-		/*Found a human/zombie outside the grid*/
 		if(Mesh[SIZE+1][j]->isEmpty() == FALSE)
 		{
-			/*If the original place is empty, put it back*/
 			if(Mesh[SIZE][j]->isEmpty() == TRUE)
 			{
 				aux = Mesh[SIZE+1][j];
@@ -412,13 +437,14 @@ void proccessBoundaries(GridCell*** Mesh)
 			}
 		}
 	}
-	/*Left boundary*/
+	
+	/*
+	Left boundary
+	*/
 	for(i = 1; i < SIZE+1; i++)
 	{
-		/*Found a human/zombie outside the grid*/
 		if(Mesh[i][0]->isEmpty() == FALSE)
 		{
-			/*If the original place is empty, put it back*/
 			if(Mesh[i][1]->isEmpty() == TRUE)
 			{
 				aux = Mesh[i][0];
@@ -485,7 +511,10 @@ void proccessBoundaries(GridCell*** Mesh)
 			}
 		}
 	}
-	/*Right boundary*/
+	
+	/*
+	Right boundary
+	*/
 	for(i = 1; i < SIZE+1; i++)
 	{
 		if(Mesh[i][SIZE+1]->isEmpty() == FALSE)
