@@ -165,7 +165,7 @@ int fillMesh(GridCell*** Mesh, MTRand* mtwister)
 			/*
 			This establishes a probability of having 2 zombies.
 			*/
-			else if(aux_rand < NT_POP_DENSITY + (NUM_OF_ZOMBIES/(SIZE*SIZE)))
+			else if(aux_rand < NT_POP_DENSITY + (NUM_OF_ZOMBIES/(double)(SIZE*SIZE)))
 			{
 				Mesh[i][j]->setToZombie(new Zombie(0));
 				num_zombies += 1;

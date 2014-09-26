@@ -25,8 +25,8 @@ using namespace std;
 #define NT_POP_DENSITY 0.171
 
 /*Simulation parameters*/
-#define YEARS	1
-#define STEPS	50
+#define YEARS	10
+#define STEPS	365
 #define SIZE	500
 #define MOVE	0.1
 #define TRUE	1
@@ -49,8 +49,8 @@ using namespace std;
 #define ELDER	2
 
 /*Zombies parameters*/
-#define INFECTION_PROB 0.8
+#define INFECTION_PROB 0.5
 #define KILL_ZOMBIE 0.05
-#define NUM_OF_ZOMBIES 2
+#define NUM_OF_ZOMBIES 2.0
 
 #endif // __ZOMBIESIM_PARAMETERS_HPP_INCLUDED__

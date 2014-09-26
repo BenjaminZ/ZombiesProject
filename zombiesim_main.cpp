@@ -42,11 +42,12 @@ void unlock(int i, bool *locks)
 
 int main(int argc, char **argv) 
 {
+	char str[100];
 	int i, j, n, num_zombies;
 	double aux_rand;
 	bool *locks = new bool[SIZE + 2];
 	GridCell ***MeshA, ***MeshB, ***aux;
-	MTRand mt_thread[64];
+	MTRand mt_thread[64]; //Max of 64 threads
 
 	/*
 	Initializes the MersenneTwister PRNG.
@@ -64,9 +65,11 @@ int main(int argc, char **argv)
 	initializeMesh(MeshA, MeshB);
 	num_zombies = fillMesh(MeshA, &mt_thread[0]);
 
-	std::cout << "Time" << "\t" << "Male\tFemale\tZombies" << " Starting Zombies: ";
-	std::cout << num_zombies <<std::endl;
+	std::cout << "Time" << "\t" << "Male\tFemale\tZombies"<<std::endl;
 	printPopulation(MeshA, 1);
+	
+	sprintf(str, "inf_prob_%.2lf_step%05d.bmp", INFECTION_PROB, 1);
+	printToBitmap(MeshA, str, SIZE+2, SIZE+2);
 	/*
 	Main loop
 	*/
@@ -179,10 +182,11 @@ int main(int argc, char **argv)
 		MeshB = MeshA;
 		MeshA = aux;
 		
-		char str[100];
-		sprintf(str, "step%05d", n);
-		printToBitmap(MeshA, str, SIZE+2, SIZE+2);
+		sprintf(str, "inf_prob_%.2lf_step%05d.bmp", INFECTION_PROB, n);
+		if(n % 50 == 0) printToBitmap(MeshA, str, SIZE+2, SIZE+2);
 	}
+	sprintf(str, "inf_prob_%.2lf_step%05d.bmp", INFECTION_PROB, n);
+	printToBitmap(MeshA, str, SIZE+2, SIZE+2);
 
 	return 0;
 }
