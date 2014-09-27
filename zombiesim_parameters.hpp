@@ -19,7 +19,9 @@ using namespace std;
 #define NT_BIRTHS_PER_DAY 11.20
 #define NT_DEATHS_PER_DAY 2.84
 #define NT_YOUNG 22.6
+#define NT_YOUNG_FINAL_AGE 14
 #define NT_ADULT 61.8
+#define NT_ADULT_FINAL_AGE 54
 #define NT_ELDER 15.6
 #define NT_MALE_PERCENTAGE 52.5
 #define NT_POP_DENSITY 0.171
@@ -49,7 +51,7 @@ using namespace std;
 #define ELDER	2
 
 /*Zombies parameters*/
-#define INFECTION_PROB 0.5
+#define INFECTION_PROB 0.2
 #define KILL_ZOMBIE 0.05
 #define NUM_OF_ZOMBIES 2.0
 

@@ -81,9 +81,8 @@ int main(int argc, char **argv)
 		birth and death based on current population size.
 		Also resets the number of babies.
 		*/
-		//double 	prob_birth 	= getBirthRate(MeshA)/(double)getPairingNumber(MeshA);
+		double 	prob_birth 	= getBirthRate(MeshA)/(double)getPairingNumber(MeshA);
 		//double	prob_birth	= 1.97/(double)getPopulation(MeshA);
-		double	prob_birth 	= 0.0;
 		double 	prob_death 	= getDeathRate(MeshA)/(double)getPopulation(MeshA);
 		int 	babycounter = 0;
 		
