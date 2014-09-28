@@ -68,7 +68,7 @@ int main(int argc, char **argv)
 	std::cout << "Time" << "\t" << "Male\tFemale\tZombies"<<std::endl;
 	printPopulation(MeshA, 1);
 	
-	sprintf(str, "inf_prob_%.2lf_step%05d.bmp", INFECTION_PROB, 1);
+	sprintf(str, "Bitmaps/inf_prob_%.2lf_step%05d.bmp", INFECTION_PROB, 1);
 	printToBitmap(MeshA, str, SIZE+2, SIZE+2);
 	/*
 	Main loop
@@ -182,10 +182,10 @@ int main(int argc, char **argv)
 		MeshB = MeshA;
 		MeshA = aux;
 		
-		sprintf(str, "inf_prob_%.2lf_step%05d.bmp", INFECTION_PROB, n);
+		sprintf(str, "Bitmaps/inf_prob_%.2lf_step%05d.bmp", INFECTION_PROB, n);
 		if(n % 50 == 0) printToBitmap(MeshA, str, SIZE+2, SIZE+2);
 	}
-	sprintf(str, "inf_prob_%.2lf_step%05d.bmp", INFECTION_PROB, n);
+	sprintf(str, "Bitmaps/inf_prob_%.2lf_step%05d.bmp", INFECTION_PROB, n);
 	printToBitmap(MeshA, str, SIZE+2, SIZE+2);
 
 	return 0;
