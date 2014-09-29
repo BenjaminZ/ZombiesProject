@@ -68,7 +68,7 @@ int main(int argc, char **argv)
 	std::cout << "Time" << "\t" << "Male\tFemale\tZombies"<<std::endl;
 	printPopulation(MeshA, 1);
 	
-	sprintf(str, "inf_prob_%.2lf_step%05d.bmp", INFECTION_PROB, 1);
+	sprintf(str, "Bitmaps/inf_prob_%.2lf_step%05d.bmp", INFECTION_PROB, 1);
 	printToBitmap(MeshA, str, SIZE+2, SIZE+2);
 	/*
 	Main loop
@@ -81,9 +81,8 @@ int main(int argc, char **argv)
 		birth and death based on current population size.
 		Also resets the number of babies.
 		*/
-		//double 	prob_birth 	= getBirthRate(MeshA)/(double)getPairingNumber(MeshA);
+		double 	prob_birth 	= getBirthRate(MeshA)/(double)getPairingNumber(MeshA);
 		//double	prob_birth	= 1.97/(double)getPopulation(MeshA);
-		double	prob_birth 	= 0.0;
 		double 	prob_death 	= getDeathRate(MeshA)/(double)getPopulation(MeshA);
 		int 	babycounter = 0;
 		
@@ -103,7 +102,7 @@ int main(int argc, char **argv)
 			#endif
 			
 			int num_thread = omp_get_thread_num();
-
+            printf("%d\n", num_thread);
 			for (int j = 1; j <= SIZE; j++) 
 			{
 				/*
@@ -183,10 +182,10 @@ int main(int argc, char **argv)
 		MeshB = MeshA;
 		MeshA = aux;
 		
-		sprintf(str, "inf_prob_%.2lf_step%05d.bmp", INFECTION_PROB, n);
+		sprintf(str, "Bitmaps/inf_prob_%.2lf_step%05d.bmp", INFECTION_PROB, n);
 		if(n % 50 == 0) printToBitmap(MeshA, str, SIZE+2, SIZE+2);
 	}
-	sprintf(str, "inf_prob_%.2lf_step%05d.bmp", INFECTION_PROB, n);
+	sprintf(str, "Bitmaps/inf_prob_%.2lf_step%05d.bmp", INFECTION_PROB, n);
 	printToBitmap(MeshA, str, SIZE+2, SIZE+2);
 
 	return 0;

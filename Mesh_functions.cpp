@@ -126,9 +126,8 @@ fillMesh:
 */
 int fillMesh(GridCell*** Mesh, MTRand* mtwister)
 {
-	int i, j, num_zombies;
-	double aux_rand;
-	int gender, age, agemodifier, birthdate;
+	int i, j, num_zombies, gender, age, agemodifier, birthdate, counter;
+	double aux_rand, acc, step;
 
 	for (num_zombies = 0, i = 1; i <= SIZE; i++)
 	{ 
@@ -149,17 +148,48 @@ int fillMesh(GridCell*** Mesh, MTRand* mtwister)
 				*/
 				aux_rand = mtwister->randExc();
 				if(aux_rand < (NT_YOUNG/100)) agemodifier = YOUNG;
-				else if(aux_rand < (NT_ADULT/100)) agemodifier = ADULT;
+				else if(aux_rand < ((NT_YOUNG+NT_ADULT)/100)) agemodifier = ADULT;
 				else agemodifier = ELDER;
 
 				/*
-				Define age (in steps)
+				Define age (in steps prior to the simulation)
 				*/
-
+				switch(agemodifier)
+				{
+					case YOUNG:
+						step = 1/(double)(NT_YOUNG_FINAL_AGE);
+						aux_rand = mtwister->randExc();
+						for(counter = 1, acc = step; acc < 1; acc += step, counter++)
+						{
+							if(aux_rand < acc)
+							{
+								age = -365*counter;
+								break;
+							}
+						}
+						if(acc >= 1) age = -365*NT_YOUNG_FINAL_AGE;
+						break;
+					case ADULT:
+						step = 1/(double)(NT_ADULT_FINAL_AGE-NT_YOUNG_FINAL_AGE);
+						aux_rand = mtwister->randExc();
+						for(counter = NT_YOUNG_FINAL_AGE+1, acc = step; acc < 1; acc += step, counter++)
+						{
+							if(aux_rand < acc)
+							{
+								age = -365*counter;
+								break;
+							}
+						}
+						if(acc >= 1) age = -365*NT_ADULT_FINAL_AGE;
+						break;
+					case ELDER:
+						age = -(NT_ADULT_FINAL_AGE+1)*365;
+						break;
+				}
 				/*
 				Creates human.
 				*/
-				Mesh[i][j]->setToHuman(new Human(gender, 0, agemodifier, HEALTHY));
+				Mesh[i][j]->setToHuman(new Human(gender, age, agemodifier, HEALTHY));
 			}
 			/*
 			This establishes a probability of having 2 zombies.
