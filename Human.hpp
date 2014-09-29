@@ -4,7 +4,7 @@ File: Human.hpp
 #ifndef __HUMAN_HPP_INCLUDED__
 #define __HUMAN_HPP_INCLUDED__
 
-#include "zombiesim_parameters.hpp"
+#include "zombiesim.hpp"
 
 class Human
 {

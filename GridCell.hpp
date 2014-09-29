@@ -8,7 +8,7 @@ File: GridCell.hpp
 #include <stdio.h>
 #include "Zombie.hpp"
 #include "Human.hpp"
-#include "zombiesim_parameters.hpp"
+#include "zombiesim.hpp"
 
 class GridCell
 {

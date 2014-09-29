@@ -1,12 +1,12 @@
 /*
-File: Mesh_functions.hpp
+File: MeshManipulation.hpp
 */
 
-#ifndef __MESH_FUNCTIONS_HPP_INCLUDED__
-#define __MESH_FUNCTIONS_HPP_INCLUDED__
+#ifndef __MESH_MANIPULATION_HPP_INCLUDED__
+#define __MESH_MANIPULATION_HPP_INCLUDED__
 
 #include "MersenneTwister.h"
-#include "zombiesim_parameters.hpp"
+#include "zombiesim.hpp"
 #include "Zombie.hpp"
 #include "Human.hpp"
 #include "GridCell.hpp"
@@ -17,7 +17,9 @@ double getPairingNumber(GridCell***);
 
 double getBirthRate(GridCell***);
 
-double getDeathRate(GridCell***);
+void getAgeGroupNumbers(GridCell***, int*);
+
+void getDeathProb(GridCell***, double*);
 
 void printPopulation(GridCell***, int);
 
@@ -29,4 +31,4 @@ int fillMesh(GridCell***, MTRand*);
 
 void printToBitmap(GridCell***, char*, int, int);
 
-#endif // __MESH_FUNCTIONS_HPP_INCLUDED__
+#endif // __MESH_MANIPULATION_HPP_INCLUDED__

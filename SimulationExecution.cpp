@@ -1,7 +1,7 @@
 /*
-File: Sim_functions.hpp
+File: SimulationExecution.cpp
 */
-#include "Sim_functions.hpp"
+#include "SimulationExecution.hpp"
 
 int executeBirthControl(GridCell*** MeshA, int i, int j, double prob_birth, MTRand* mtwister)
 {
@@ -11,44 +11,70 @@ int executeBirthControl(GridCell*** MeshA, int i, int j, double prob_birth, MTRa
 
 	prob = mtwister->randExc();
 
-	if(prob > prob_birth) return FALSE;
-
+	if(MeshA[i][j]->getStatus() == MALE)
+		if(MeshA[i-1][j]->getStatus() == FEMALE || MeshA[i][j+1]->getStatus() == FEMALE || 
+			MeshA[i+1][j]->getStatus() == FEMALE || MeshA[i][j-1]->getStatus() == FEMALE)
+			if(prob < prob_birth) return TRUE;
 	else
-	{
-		if(MeshA[i][j]->getStatus() == MALE)
-		{
-			if(MeshA[i-1][j]->getStatus() == FEMALE || MeshA[i][j+1]->getStatus() == FEMALE || 
-				MeshA[i+1][j]->getStatus() == FEMALE || MeshA[i][j-1]->getStatus() == FEMALE)
-				return TRUE;
-		}
-		else
-		{
-			if(MeshA[i-1][j]->getStatus() == MALE || MeshA[i][j+1]->getStatus() == MALE || 
-				MeshA[i+1][j]->getStatus() == MALE || MeshA[i][j-1]->getStatus() == MALE)
-				return TRUE;
-		}
-	}
+		if(MeshA[i-1][j]->getStatus() == MALE || MeshA[i][j+1]->getStatus() == MALE || 
+			MeshA[i+1][j]->getStatus() == MALE || MeshA[i][j-1]->getStatus() == MALE)
+			if(prob < prob_birth) return TRUE;	
+
 	return FALSE;
 }
 
 void executeMovement(GridCell*** MeshA, GridCell*** MeshB, int i, int j, MTRand* mtwister)
 {
 	/*
+	flags[0] - Move up
+	flags[1] - Move down
+	flags[2] - Move left
+	flags[3] - Move right
+	*/
+	int flags[4] = {FALSE, FALSE, FALSE, FALSE};
+	double move, range, offset, step;
+	GridCell* aux_cell;
+	/*
 	Checks if cell is not empty.
 	*/
 	if(MeshA[i][j]->isEmpty() == FALSE) 
 	{ 
-		GridCell* aux_cell = MeshA[i][j];
-
+		aux_cell = MeshA[i][j];
 		MeshA[i][j] = new GridCell();
+		/*
+		Define the movement probability based on Human(Age)/Zombie
+		*/
+		if(aux_cell->isHuman())
+		{
+			switch(aux_cell->getHuman()->getAgeGroup())
+			{
+				case YOUNG:
+					step = YOUNG_MOVE;
+					break;
+				case ADULT:
+					step = ADULT_MOVE;
+					break;
+				case ELDER:
+					step = ELDER_MOVE;
+					break;
+			}
+		}
+		else if(aux_cell->isZombie()) step = ZOMBIE_MOVE;
 
-		double move = mtwister->randExc();
-
+		/*
+		Define the direction of movement.
+		*/
+		move = mtwister->randExc();
+		range = 4.0*step;
+		offset = (1.0 - range)/2.0;
+		if(move >= offset && move < offset + 1.0*step) flags[0] = TRUE;
+		else if(move >= offset + 1.0*step && move < offset + 2.0*step) flags[1] = TRUE;
+		else if(move >= offset + 2.0*step && move < offset + 3.0*step) flags[2] = TRUE;
+		else if(move >= offset + 3.0*step && move < offset + 4.0*step) flags[3] = TRUE;
 		/*
 		Move up
 		*/
-		//if(move < 1.0*MOVE && MeshA[i-1][j]->isEmpty() == TRUE && MeshB[i-1][j]->isEmpty() == TRUE)
-		if(move >= 0.3 && move < 0.4 && MeshA[i-1][j]->isEmpty() == TRUE && MeshB[i-1][j]->isEmpty() == TRUE) 
+		if(flags[0] && MeshA[i-1][j]->isEmpty() == TRUE && MeshB[i-1][j]->isEmpty() == TRUE) 
 		{
 			delete MeshB[i-1][j];
 			MeshB[i-1][j] = aux_cell;
@@ -56,8 +82,7 @@ void executeMovement(GridCell*** MeshA, GridCell*** MeshB, int i, int j, MTRand*
 		/*
 		Move down
 		*/
-		//else if(move < 2.0*MOVE && MeshA[i+1][j]->isEmpty() == TRUE && MeshB[i+1][j]->isEmpty() == TRUE) 
-		else if(move >= 0.4 && move < 0.5 && MeshA[i+1][j]->isEmpty() == TRUE && MeshB[i+1][j]->isEmpty() == TRUE) 
+		else if(flags[1] && MeshA[i+1][j]->isEmpty() == TRUE && MeshB[i+1][j]->isEmpty() == TRUE) 
 		{
 			delete MeshB[i+1][j];
 			MeshB[i+1][j] = aux_cell;
@@ -65,8 +90,7 @@ void executeMovement(GridCell*** MeshA, GridCell*** MeshB, int i, int j, MTRand*
 		/*
 		Move left
 		*/
-		//else if(move < 3.0*MOVE && MeshA[i][j-1]->isEmpty() == TRUE && MeshB[i][j-1]->isEmpty() == TRUE) 
-		else if(move >= 0.5 && move < 0.6 && MeshA[i][j-1]->isEmpty() == TRUE && MeshB[i][j-1]->isEmpty() == TRUE)
+		else if(flags[2] && MeshA[i][j-1]->isEmpty() == TRUE && MeshB[i][j-1]->isEmpty() == TRUE)
 		{
 			delete MeshB[i][j-1];
 			MeshB[i][j-1] = aux_cell;
@@ -74,8 +98,7 @@ void executeMovement(GridCell*** MeshA, GridCell*** MeshB, int i, int j, MTRand*
 		/*
 		Move right
 		*/
-		//else if(move < 4.0*MOVE && MeshA[i][j+1]->isEmpty() == TRUE && MeshB[i][j+1]->isEmpty() == TRUE) 
-		else if(move >= 0.6 && move < 0.7 && MeshA[i][j+1]->isEmpty() == TRUE && MeshB[i][j+1]->isEmpty() == TRUE) 
+		else if(flags[3] && MeshA[i][j+1]->isEmpty() == TRUE && MeshB[i][j+1]->isEmpty() == TRUE) 
 		{
 			delete MeshB[i][j+1];
 			MeshB[i][j+1] = aux_cell;
@@ -159,7 +182,7 @@ void executeInfection(GridCell*** Mesh, int i, int j, int n, MTRand* mtwister)
 	return;
 }
 
-void executeDeathControl(GridCell*** Mesh, int i, int j, double prob_death, int n, MTRand* mtwister)
+void executeDeathControl(GridCell*** Mesh, int i, int j, double* prob_death, int n, MTRand* mtwister)
 {
 	double prob_kill;
 
@@ -170,21 +193,21 @@ void executeDeathControl(GridCell*** Mesh, int i, int j, double prob_death, int 
 		switch(Mesh[i][j]->getHuman()->getAgeGroup())
 		{
 			case YOUNG:
-				if(prob_kill >= 0.5 && prob_kill < 0.5 + NT_YOUNG_DEATH*prob_death)
+				if(prob_kill < prob_death[0])
 				{
 					delete Mesh[i][j];
 					Mesh[i][j] = new GridCell();
 				}
 				break;
 			case ADULT:
-				if(prob_kill >= 0.5 && prob_kill < 0.5 + NT_ADULT_DEATH*prob_death)
+				if(prob_kill < prob_death[1])
 				{
 					delete Mesh[i][j];
 					Mesh[i][j] = new GridCell();
 				}
 				break;
 			case ELDER:
-				if(prob_kill >= 0.5 && prob_kill < 0.5 + NT_ELDER_DEATH*prob_death)
+				if(prob_kill < prob_death[2])
 				{
 					delete Mesh[i][j];
 					Mesh[i][j] = new GridCell();

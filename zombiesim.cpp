@@ -1,14 +1,14 @@
 /*
-File: zombiesim_main.cpp
+File: zombiesim.cpp
 */
 #include <omp.h>
 #include "MersenneTwister.h"
-#include "zombiesim_parameters.hpp"
+#include "zombiesim.hpp"
 #include "Human.hpp"
 #include "Zombie.hpp"
 #include "GridCell.hpp"
-#include "Sim_functions.hpp"
-#include "Mesh_functions.hpp"
+#include "SimulationExecution.hpp"
+#include "MeshManipulation.hpp"
 
 #if defined(_OPENMP)
 void lock(int i, bool *locks) 
@@ -61,13 +61,11 @@ int main(int argc, char **argv)
 	MeshA = (GridCell***)malloc((SIZE+2)*(sizeof(GridCell**)));
 	MeshB = (GridCell***)malloc((SIZE+2)*(sizeof(GridCell**)));
 	for (i = 0; i < SIZE + 2; i++) locks[i] = false;
-	
 	initializeMesh(MeshA, MeshB);
 	num_zombies = fillMesh(MeshA, &mt_thread[0]);
-
+	
 	std::cout << "Time" << "\t" << "Male\tFemale\tZombies"<<std::endl;
 	printPopulation(MeshA, 1);
-	
 	sprintf(str, "Bitmaps/inf_prob_%.2lf_step%05d.bmp", INFECTION_PROB, 1);
 	printToBitmap(MeshA, str, SIZE+2, SIZE+2);
 	/*
@@ -81,17 +79,18 @@ int main(int argc, char **argv)
 		birth and death based on current population size.
 		Also resets the number of babies.
 		*/
-		double 	prob_birth 	= getBirthRate(MeshA)/(double)getPairingNumber(MeshA);
-		double 	prob_death 	= getDeathRate(MeshA)/(double)getPopulation(MeshA);
+		double 	prob_birth, death_prob[3];
 		int 	babycounter = 0;
 		
+		getDeathProb(MeshA, death_prob);
+		prob_birth = getBirthRate(MeshA)/(double)getPairingNumber(MeshA);
 		/*
 		Parallel for loop. "babycounter" is firstprivate because each thread 
 		will count its own number of babies and they have to receive an 
 		initialized value of this variable.
 		*/
 		#if defined(_OPENMP)
-		#pragma omp parallel for default(none) firstprivate(babycounter) shared(mt_thread, MeshA, MeshB, locks, n, prob_birth, prob_death)
+		#pragma omp parallel for default(none) firstprivate(babycounter) shared(mt_thread, MeshA, MeshB, locks, n, prob_birth, death_prob)
 		#endif
 
 		for (i = 1; i <= SIZE; i++) 
@@ -154,7 +153,7 @@ int main(int argc, char **argv)
 				/*
 				Humans and Zombies live for a limited lifespan.
 				*/
-				executeDeathControl(MeshA, i, j, prob_death, n, &mt_thread[num_thread]);
+				executeDeathControl(MeshA, i, j, death_prob, n, &mt_thread[num_thread]);
 
 				/*
 				They can move up, down, left, right or stay in the same place.
@@ -184,6 +183,7 @@ int main(int argc, char **argv)
 		sprintf(str, "Bitmaps/inf_prob_%.2lf_step%05d.bmp", INFECTION_PROB, n);
 		if(n % 50 == 0) printToBitmap(MeshA, str, SIZE+2, SIZE+2);
 	}
+	printPopulation(MeshA, n);
 	sprintf(str, "Bitmaps/inf_prob_%.2lf_step%05d.bmp", INFECTION_PROB, n);
 	printToBitmap(MeshA, str, SIZE+2, SIZE+2);
 

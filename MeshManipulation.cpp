@@ -1,8 +1,8 @@
 /*
-File: Mesh_functions.cpp
+File: MeshManipulation.cpp
 */
 
-#include "Mesh_functions.hpp"
+#include "MeshManipulation.hpp"
 /*
 getPopulation:
 	Calculates the total population of humans.
@@ -14,6 +14,32 @@ int getPopulation(GridCell*** Mesh)
 		for (int j = 1; j <= SIZE; j++)
 			if (Mesh[i][j]->isHuman() == TRUE) populationTotal++;
 	return populationTotal;
+}
+
+void getAgeGroupNumbers(GridCell*** Mesh, int* groups)
+{
+	for (int i = 1; i <= SIZE; i++) 
+	{	
+		for (int j = 1; j <= SIZE; j++)
+		{
+			if (Mesh[i][j]->isHuman() == TRUE)
+			{
+				switch(Mesh[i][j]->getHuman()->getAgeGroup())
+				{
+					case YOUNG:
+						groups[0] += 1;
+						break;
+					case ADULT:
+						groups[1] += 1;
+						break;
+					case ELDER:
+						groups[2] += 1;
+						break;
+				}
+			}
+		}
+	}
+	return;
 }
 
 /*
@@ -65,9 +91,25 @@ double getBirthRate(GridCell*** Mesh)
 getDeathRate:
 	adjusts the NT death rate to the current grid population.
 */
-double getDeathRate(GridCell*** Mesh)
+void getDeathProb(GridCell*** Mesh, double* death_prob)
 {
-	return ((double)getPopulation(Mesh))*(NT_DEATHS_PER_DAY)/(NT_POP);
+	double deaths;
+	int groups[3] = {0,0,0}, population;
+
+	population = getPopulation(Mesh);
+	deaths = NT_DEATHS_PER_DAY*((double)population)/NT_POP;
+	getAgeGroupNumbers(Mesh, groups);
+
+	/*
+	Variables: 'deaths' holds the amount of deaths per day;
+	'groups[3]' hold the population size for young, adult and elder;
+
+	*/
+	death_prob[0] = deaths*NT_YOUNG_DEATH/((double)groups[0]);
+	death_prob[1] = deaths*NT_ADULT_DEATH/((double)groups[1]);
+	death_prob[2] = deaths*NT_ELDER_DEATH/((double)groups[2]);
+
+	return;
 }
 
 /*
