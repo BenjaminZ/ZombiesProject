@@ -82,9 +82,7 @@ int main(int argc, char **argv)
 		Also resets the number of babies.
 		*/
 		double 	prob_birth 	= getBirthRate(MeshA)/(double)getPairingNumber(MeshA);
-		//double	prob_birth	= 1.97/(double)getPopulation(MeshA);
 		double 	prob_death 	= getDeathRate(MeshA)/(double)getPopulation(MeshA);
-		
 		int 	babycounter = 0;
 		
 		/*
@@ -103,7 +101,7 @@ int main(int argc, char **argv)
 			#endif
 			
 			int num_thread = omp_get_thread_num();
-			printf("%d\n", num_thread);
+
 			for (int j = 1; j <= SIZE; j++) 
 			{
 				/*

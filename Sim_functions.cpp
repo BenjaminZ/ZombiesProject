@@ -167,15 +167,34 @@ void executeDeathControl(GridCell*** Mesh, int i, int j, double prob_death, int 
 	{
 		prob_kill = mtwister->randExc();
 
-		if(prob_kill < prob_death)
+		switch(Mesh[i][j]->getHuman()->getAgeGroup())
 		{
-			delete Mesh[i][j];
-			Mesh[i][j] = new GridCell();
+			case YOUNG:
+				if(prob_kill >= 0.5 && prob_kill < 0.5 + NT_YOUNG_DEATH*prob_death)
+				{
+					delete Mesh[i][j];
+					Mesh[i][j] = new GridCell();
+				}
+				break;
+			case ADULT:
+				if(prob_kill >= 0.5 && prob_kill < 0.5 + NT_ADULT_DEATH*prob_death)
+				{
+					delete Mesh[i][j];
+					Mesh[i][j] = new GridCell();
+				}
+				break;
+			case ELDER:
+				if(prob_kill >= 0.5 && prob_kill < 0.5 + NT_ELDER_DEATH*prob_death)
+				{
+					delete Mesh[i][j];
+					Mesh[i][j] = new GridCell();
+				}
+				break;
 		}
 	}
 	else if(Mesh[i][j]->isZombie() == TRUE)
 	{
-		if((n - Mesh[i][j]->getZombie()->getTurningDate()) > 4*365)
+		if((n - Mesh[i][j]->getZombie()->getTurningDate()) > ZOMBIE_LIFESPAN*365)
 		{
 			delete Mesh[i][j];
 			Mesh[i][j] = new GridCell();
