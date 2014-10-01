@@ -48,7 +48,7 @@ int main(int argc, char **argv)
 	bool *locks = new bool[SIZE + 2];
 	GridCell ***MeshA, ***MeshB, ***aux;
 	MTRand mt_thread[64]; //Max of 64 threads
-
+	FILE* output;
 	/*
 	Initializes the MersenneTwister PRNG.
 	*/
@@ -63,17 +63,21 @@ int main(int argc, char **argv)
 	for (i = 0; i < SIZE + 2; i++) locks[i] = false;
 	initializeMesh(MeshA, MeshB);
 	num_zombies = fillMesh(MeshA, &mt_thread[0]);
-	
-	std::cout << "Time" << "\t" << "Male\tFemale\tZombies"<<std::endl;
-	printPopulation(MeshA, 1);
-	sprintf(str, "Bitmaps/inf_prob_%.2lf_step%05d.bmp", INFECTION_PROB, 1);
+
+	/*
+	Output definition.
+	*/
+	sprintf(str,"%soutput.txt", OUTPUT_PATH);
+	output = fopen(str, "w+");
+	fprintf(output,"Time\tMale\tFemal\tZombies\n");
+	sprintf(str, "%sINFPROB_%.3lf_step%05d.bmp", BITMAP_PATH, INFECTION_PROB, n);
 	printToBitmap(MeshA, str, SIZE+2, SIZE+2);
 	/*
 	Main loop
 	*/
 	for (n = 1; n <= YEARS*STEPS; n++) 
 	{
-		if(n % 50 == 0) printPopulation(MeshA, n);
+		printPopulation(output, MeshA, n);
 		/*
 		For each timestep, calculates a new probability of
 		birth and death based on current population size.
@@ -180,13 +184,35 @@ int main(int argc, char **argv)
 		aux = MeshB;
 		MeshB = MeshA;
 		MeshA = aux;
-		
-		sprintf(str, "Bitmaps/inf_prob_%.2lf_step%05d.bmp", INFECTION_PROB, n);
-		if(n % 50 == 0) printToBitmap(MeshA, str, SIZE+2, SIZE+2);
-	}
-	printPopulation(MeshA, n);
-	sprintf(str, "Bitmaps/inf_prob_%.2lf_step%05d.bmp", INFECTION_PROB, n);
-	printToBitmap(MeshA, str, SIZE+2, SIZE+2);
 
+		if(!(n % BITMAP_STEP))
+		{
+			sprintf(str, "%sINFPROB_%.3lf_step%05d.bmp", BITMAP_PATH, INFECTION_PROB, n);
+			printToBitmap(MeshA, str, SIZE+2, SIZE+2);
+		}
+	}
+
+	sprintf(str, "%sINFPROB_%.3lf_step%05d.bmp", BITMAP_PATH, INFECTION_PROB, n);
+	printToBitmap(MeshA, str, SIZE+2, SIZE+2);
+	/*
+	Clear memory.
+	*/
+	fclose(output);
+	for(i = 0; i < SIZE+2; i++)
+	{		
+		for(j = 0; j < SIZE+2; j++)
+		{
+			delete MeshA[i][j];
+			delete MeshB[i][j];
+		}
+	}
+	for(i = 0; i < SIZE+2; i++)
+	{
+		free(MeshA[i]);
+		free(MeshB[i]);
+	}
+	free(MeshA);
+	free(MeshB);
+	
 	return 0;
 }

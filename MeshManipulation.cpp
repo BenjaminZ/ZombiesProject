@@ -116,7 +116,7 @@ void getDeathProb(GridCell*** Mesh, double* death_prob)
 printPopulation:
 	Print current population of humans and zombies.
 */
-void printPopulation(GridCell*** Mesh, int t) 
+void printPopulation(FILE* output, GridCell*** Mesh, int t) 
 {
 	int male = 0, female = 0, zombies = 0;
 	for (int i = 1; i <= SIZE; i++)
@@ -131,8 +131,7 @@ void printPopulation(GridCell*** Mesh, int t)
 			else if(Mesh[i][j]->isZombie() == TRUE) zombies++;
 		}
 	}
-
-	cout << t << "\t" << male << "\t" << female << "\t" << zombies << std::endl;
+	fprintf(output, "%d\t%d\t%d\t%d\n", t, male, female, zombies);
 	return;
 }
 

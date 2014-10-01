@@ -21,7 +21,7 @@ void getAgeGroupNumbers(GridCell***, int*);
 
 void getDeathProb(GridCell***, double*);
 
-void printPopulation(GridCell***, int);
+void printPopulation(FILE*, GridCell***, int);
 
 void proccessBoundaries(GridCell***);
 

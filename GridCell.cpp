@@ -9,7 +9,12 @@ GridCell::GridCell()
 	z = NULL;
 	h = NULL;
 }
-
+GridCell::~GridCell()
+{
+	if(z != NULL) delete z;
+	if(h != NULL) delete h;
+	return;
+}
 void GridCell::setToHuman(Human *aux)
 {
 	if(z != NULL)
