@@ -18,16 +18,23 @@ using namespace std;
 #define NT_POP 235182
 #define NT_BIRTHS_PER_DAY 11.20
 #define NT_DEATHS_PER_DAY 2.84
+/*0-14*/
 #define NT_YOUNG 22.6
 #define NT_YOUNG_FINAL_AGE 14
+/*15-54*/
 #define NT_ADULT 61.8
 #define NT_ADULT_FINAL_AGE 54
+/*55+*/
 #define NT_ELDER 15.6
 #define NT_MALE_PERCENTAGE 52.5
 #define NT_POP_DENSITY 0.171
 
+#define NT_YOUNG_DEATH 0.0102
+#define NT_ADULT_DEATH 0.0883
+#define NT_ELDER_DEATH 0.9014
+
 /*Simulation parameters*/
-#define YEARS	10
+#define YEARS	1
 #define STEPS	365
 #define SIZE	500
 #define MOVE	0.1
@@ -51,8 +58,9 @@ using namespace std;
 #define ELDER	2
 
 /*Zombies parameters*/
-#define INFECTION_PROB 0.2
+#define INFECTION_PROB 0.0
 #define KILL_ZOMBIE 0.05
-#define NUM_OF_ZOMBIES 2.0
+#define NUM_OF_ZOMBIES 0.0
+#define ZOMBIE_LIFESPAN 4
 
 #endif // __ZOMBIESIM_PARAMETERS_HPP_INCLUDED__
