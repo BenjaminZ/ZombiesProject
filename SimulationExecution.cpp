@@ -190,30 +190,30 @@ void executeDeathControl(GridCell*** Mesh, int i, int j, double* prob_death, int
 	{
 		prob_kill = mtwister->randExc();
 
-		// switch(Mesh[i][j]->getHuman()->getAgeGroup())
-		// {
-		// 	case YOUNG:
-		// 		if(prob_kill >= 0.5 && prob_kill < 0.5 + NT_YOUNG_DEATH*prob_death)
-		// 		{
-		// 			delete Mesh[i][j];
-		// 			Mesh[i][j] = new GridCell();
-		// 		}
-		// 		break;
-		// 	case ADULT:
-		// 		if(prob_kill >= 0.5 && prob_kill < 0.5 + NT_ADULT_DEATH*prob_death)
-		// 		{
-		// 			delete Mesh[i][j];
-		// 			Mesh[i][j] = new GridCell();
-		// 		}
-		// 		break;
-		// 	case ELDER:
-		// 		if(prob_kill >= 0.5 && prob_kill < 0.5 + NT_ELDER_DEATH*prob_death)
-		// 		{
-		// 			delete Mesh[i][j];
-		// 			Mesh[i][j] = new GridCell();
-		// 		}
-		// 		break;
-		// }
+		switch(Mesh[i][j]->getHuman()->getAgeGroup())
+		{
+			case YOUNG:
+				if(prob_kill >= 0.5 && prob_kill < 0.5 + NT_YOUNG_DEATH*prob_death)
+				{
+					delete Mesh[i][j];
+					Mesh[i][j] = new GridCell();
+				}
+				break;
+			case ADULT:
+				if(prob_kill >= 0.5 && prob_kill < 0.5 + NT_ADULT_DEATH*prob_death)
+				{
+					delete Mesh[i][j];
+					Mesh[i][j] = new GridCell();
+				}
+				break;
+			case ELDER:
+				if(prob_kill >= 0.5 && prob_kill < 0.5 + NT_ELDER_DEATH*prob_death)
+				{
+					delete Mesh[i][j];
+					Mesh[i][j] = new GridCell();
+				}
+				break;
+		}
 
 		if (prob_kill >= 0.5 && prob_kill < 0.5 + (2.84 / 235182))
 		{
