@@ -26,6 +26,7 @@ class GridCell
 		Human* getHuman();
 		Zombie* getZombie();
 		int getStatus();
+		~GridCell();
 };
 
 #endif // __GRIDCELL_HPP_INCLUDED__

@@ -15,6 +15,11 @@ File: zombiesim.hpp
 
 using namespace std;
 
+/*Output files. Don't forget "/" at the end.*/
+#define BITMAP_STEP 50
+#define BITMAP_PATH "/home/marcos/zombiesim/Bitmaps/"
+#define OUTPUT_PATH "/home/marcos/zombiesim/"
+
 /*Northern Territory Statistics 2012*/
 #define NT_POP 235182.0
 #define NT_BIRTHS_PER_DAY 11.20
