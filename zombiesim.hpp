@@ -12,6 +12,8 @@ File: zombiesim.hpp
 #include <string.h>
 #include <math.h>
 #include <vector>
+#include <time.h>
+#include <omp.h>
 
 using namespace std;
 
@@ -40,7 +42,7 @@ using namespace std;
 #define NT_ELDER_DEATH 0.9014
 
 /*Simulation parameters*/
-#define YEARS	10
+#define YEARS	1
 #define STEPS	365
 #define SIZE	500
 #define MOVE	0.1

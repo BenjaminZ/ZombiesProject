@@ -1,7 +1,6 @@
 /*
 File: zombiesim.cpp
 */
-#include <omp.h>
 #include "MersenneTwister.h"
 #include "zombiesim.hpp"
 #include "Human.hpp"
@@ -42,6 +41,8 @@ void unlock(int i, bool *locks)
 
 int main(int argc, char **argv) 
 {
+	time_t begin, end;
+
 	char str[100];
 	int i, j, n, num_zombies;
 	double aux_rand;
@@ -49,6 +50,8 @@ int main(int argc, char **argv)
 	GridCell ***MeshA, ***MeshB, ***aux;
 	MTRand mt_thread[64]; //Max of 64 threads
 	FILE* output;
+
+	time(&begin);
 	/*
 	Initializes the MersenneTwister PRNG.
 	*/
@@ -196,7 +199,7 @@ int main(int argc, char **argv)
 	/*
 	Clear memory.
 	*/
-	fclose(output);
+	
 	for(i = 0; i < SIZE+2; i++)
 	{		
 		for(j = 0; j < SIZE+2; j++)
@@ -212,6 +215,11 @@ int main(int argc, char **argv)
 	}
 	free(MeshA);
 	free(MeshB);
+
+	time(&end);
+
+	fprintf(output, "\nTime spent: %d\n", (int)(end-begin));
+	fclose(output);
 	
 	return 0;
 }
