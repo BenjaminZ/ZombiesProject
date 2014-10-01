@@ -141,15 +141,15 @@ int main(int argc, char **argv)
 					else
 					{
 						if(executeBirthControl(MeshA, i, j, prob_birth, &mt_thread[num_thread]) == TRUE)
-							// babycounter ++;
+							 babycounter ++;
 							;
 					}
 				}
 				/*
 				A zombie can infect one human per timestep.
 				*/
-				//if(MeshA[i][j]->isZombie() == TRUE) 
-					// executeInfection(MeshA, i, j, n, &mt_thread[num_thread]);	
+				if(MeshA[i][j]->isZombie() == TRUE)
+					 executeInfection(MeshA, i, j, n, &mt_thread[num_thread]);
 				
 				/*
 				Humans and Zombies live for a limited lifespan.

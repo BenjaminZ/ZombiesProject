@@ -190,59 +190,34 @@ void executeDeathControl(GridCell*** Mesh, int i, int j, double* prob_death, int
 	{
 		prob_kill = mtwister->randExc();
 
-		switch(Mesh[i][j]->getHuman()->getAgeGroup())
-		{
-			case YOUNG:
-				if(prob_kill >= 0.5 && prob_kill < 0.5 + NT_YOUNG_DEATH*prob_death)
-				{
-					delete Mesh[i][j];
-					Mesh[i][j] = new GridCell();
-				}
-				break;
-			case ADULT:
-				if(prob_kill >= 0.5 && prob_kill < 0.5 + NT_ADULT_DEATH*prob_death)
-				{
-					delete Mesh[i][j];
-					Mesh[i][j] = new GridCell();
-				}
-				break;
-			case ELDER:
-				if(prob_kill >= 0.5 && prob_kill < 0.5 + NT_ELDER_DEATH*prob_death)
-				{
-					delete Mesh[i][j];
-					Mesh[i][j] = new GridCell();
-				}
-				break;
-		}
+
 
 		if (prob_kill >= 0.5 && prob_kill < 0.5 + (2.84 / 235182))
 		{
-<<<<<<< HEAD:Sim_functions.cpp
-			delete Mesh[i][j];
-			Mesh[i][j] = new GridCell();
-=======
-			case YOUNG:
-				if(prob_kill < prob_death[0])
-				{
-					delete Mesh[i][j];
-					Mesh[i][j] = new GridCell();
-				}
-				break;
-			case ADULT:
-				if(prob_kill < prob_death[1])
-				{
-					delete Mesh[i][j];
-					Mesh[i][j] = new GridCell();
-				}
-				break;
-			case ELDER:
-				if(prob_kill < prob_death[2])
-				{
-					delete Mesh[i][j];
-					Mesh[i][j] = new GridCell();
-				}
-				break;
->>>>>>> 2b94ce6adac4276ed4dbfa4f0e871eb08d69cb11:SimulationExecution.cpp
+            switch(Mesh[i][j]->getHuman()->getAgeGroup())
+            {
+                case YOUNG:
+                    if(prob_kill < prob_death[0])
+                    {
+                        delete Mesh[i][j];
+                        Mesh[i][j] = new GridCell();
+                    }
+                    break;
+                case ADULT:
+                    if(prob_kill < prob_death[1])
+                    {
+                        delete Mesh[i][j];
+                        Mesh[i][j] = new GridCell();
+                    }
+                    break;
+                case ELDER:
+                    if(prob_kill < prob_death[2])
+                    {
+                        delete Mesh[i][j];
+                        Mesh[i][j] = new GridCell();
+                    }
+                    break;
+            }
 		}
 	}
 	else if(Mesh[i][j]->isZombie() == TRUE)
