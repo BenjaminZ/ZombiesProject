@@ -73,7 +73,7 @@ int main(int argc, char **argv)
 	sprintf(str,"%soutput.txt", OUTPUT_PATH);
 	output = fopen(str, "w+");
 	fprintf(output,"Time\tMale\tFemal\tZombies\n");
-	sprintf(str, "%sINFPROB_%.3lf_step%05d.bmp", BITMAP_PATH, INFECTION_PROB, n);
+	sprintf(str, "%sINFPROB_%.3lf_step%05d.bmp", BITMAP_PATH, INFECTION_PROB, 0);
 	printToBitmap(MeshA, str, SIZE+2, SIZE+2);
 	/*
 	Main loop
@@ -87,7 +87,7 @@ int main(int argc, char **argv)
 		Also resets the number of babies.
 		*/
 		double 	prob_birth, death_prob[3];
-		int 	babycounter = 0;
+		int 	babycounter = 0, non_empty = 0;
 		
 		getDeathProb(MeshA, death_prob);
 		prob_birth = getBirthRate(MeshA)/(double)getPairingNumber(MeshA);
@@ -97,7 +97,7 @@ int main(int argc, char **argv)
 		initialized value of this variable.
 		*/
 		#if defined(_OPENMP)
-		#pragma omp parallel for default(none) firstprivate(babycounter) shared(mt_thread, MeshA, MeshB, locks, n, prob_birth, death_prob)
+		#pragma omp parallel for default(none) firstprivate(babycounter, non_empty) shared(mt_thread, MeshA, MeshB, locks, n, prob_birth, death_prob)
 		#endif
 
 		for (i = 1; i <= SIZE; i++) 
@@ -110,19 +110,32 @@ int main(int argc, char **argv)
 
 			for (int j = 1; j <= SIZE; j++) 
 			{
-				/*
-				Place new humans in empty cells.
-				*/
-				if(MeshA[i][j]->isEmpty() == TRUE && babycounter > 0)
+				if(babycounter > 0)
 				{
-					if(mt_thread[num_thread].randExc() < (NT_MALE_PERCENTAGE/100)) 
-						MeshB[i][j]->setToHuman(new Human(MALE, n, YOUNG, HEALTHY));
-					else 
-						MeshB[i][j]->setToHuman(new Human(FEMALE, n, YOUNG, HEALTHY));
-					
-					babycounter -= 1;
-					continue;
+					if(MeshA[i][j]->isEmpty() == FALSE)
+					{
+						non_empty += 1;
+						if(non_empty == 4) 
+						{
+							non_empty  = 0;
+							babycounter -= 1;
+						}
+					}
+					/*
+					Place new humans in empty cells.
+					*/
+					else
+					{
+						if(mt_thread[num_thread].randExc() < (NT_MALE_PERCENTAGE/100)) 
+							MeshB[i][j]->setToHuman(new Human(MALE, n, YOUNG, HEALTHY));
+						else 
+							MeshB[i][j]->setToHuman(new Human(FEMALE, n, YOUNG, HEALTHY));
+						
+						babycounter -= 1;
+						continue;
+					}
 				}
+				
 				
 				/*
 				Execute human specific actions.
