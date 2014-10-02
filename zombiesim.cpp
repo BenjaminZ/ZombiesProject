@@ -1,7 +1,6 @@
 /*
 File: zombiesim.cpp
 */
-#include <omp.h>
 #include "MersenneTwister.h"
 #include "zombiesim.hpp"
 #include "Human.hpp"
@@ -42,6 +41,8 @@ void unlock(int i, bool *locks)
 
 int main(int argc, char **argv) 
 {
+	time_t begin, end;
+
 	char str[100];
 	int i, j, n, num_zombies;
 	double aux_rand;
@@ -49,6 +50,8 @@ int main(int argc, char **argv)
 	GridCell ***MeshA, ***MeshB, ***aux;
 	MTRand mt_thread[64]; //Max of 64 threads
 	FILE* output;
+
+	time(&begin);
 	/*
 	Initializes the MersenneTwister PRNG.
 	*/
@@ -129,36 +132,36 @@ int main(int argc, char **argv)
 					/*
 					Change a exposed human for a zombie.
 					*/
-					if(MeshA[i][j]->getHuman()->getStatus() == EXPOSED)
-					{
-						if((n - MeshA[i][j]->getHuman()->getExposedDate()) > 0)
-						{
-							delete MeshA[i][j];
-							MeshA[i][j] = new GridCell();
-							MeshB[i][j]->setToZombie(new Zombie(n));
-							continue;
-						}
-					}
+//					if(MeshA[i][j]->getHuman()->getStatus() == EXPOSED)
+//					{
+//						if((n - MeshA[i][j]->getHuman()->getExposedDate()) > 0)
+//						{
+//							delete MeshA[i][j];
+//							MeshA[i][j] = new GridCell();
+//							MeshB[i][j]->setToZombie(new Zombie(n));
+//							continue;
+//						}
+//					}
 					/*
 					Checks if a human will reproduce.
 					*/
-					else
-					{
-						if(executeBirthControl(MeshA, i, j, prob_birth, &mt_thread[num_thread]) == TRUE)
-							 babycounter ++;
-							;
-					}
+//					else
+//					{
+//						if(executeBirthControl(MeshA, i, j, prob_birth, &mt_thread[num_thread]) == TRUE)
+////							 babycounter ++;
+//							;
+//					}
 				}
 				/*
 				A zombie can infect one human per timestep.
 				*/
-				if(MeshA[i][j]->isZombie() == TRUE)
-					 executeInfection(MeshA, i, j, n, &mt_thread[num_thread]);
+//				if(MeshA[i][j]->isZombie() == TRUE)
+//					 executeInfection(MeshA, i, j, n, &mt_thread[num_thread]);
 				
 				/*
 				Humans and Zombies live for a limited lifespan.
 				*/
-				executeDeathControl(MeshA, i, j, death_prob, n, &mt_thread[num_thread]);
+//				executeDeathControl(MeshA, i, j, death_prob, n, &mt_thread[num_thread]);
 
 				/*
 				They can move up, down, left, right or stay in the same place.
@@ -176,7 +179,7 @@ int main(int argc, char **argv)
 		/*
 		Deal with humans/zombies outside the grid.
 		*/
-		proccessBoundaries(MeshB);
+//		proccessBoundaries(MeshB);
 
 		/*
 		Swap pointers.
@@ -197,7 +200,7 @@ int main(int argc, char **argv)
 	/*
 	Clear memory.
 	*/
-	fclose(output);
+	
 	for(i = 0; i < SIZE+2; i++)
 	{		
 		for(j = 0; j < SIZE+2; j++)
@@ -213,6 +216,11 @@ int main(int argc, char **argv)
 	}
 	free(MeshA);
 	free(MeshB);
+
+	time(&end);
+
+	fprintf(output, "\nTime spent: %d\n", (int)(end-begin));
+	fclose(output);
 	
 	return 0;
 }

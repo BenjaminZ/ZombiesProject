@@ -74,7 +74,7 @@ void executeMovement(GridCell*** MeshA, GridCell*** MeshB, int i, int j, MTRand*
 		/*
 		Move up
 		*/
-		if(flags[0] && MeshA[i-1][j]->isEmpty() == TRUE && MeshB[i-1][j]->isEmpty() == TRUE) 
+		if(flags[0] && MeshA[i-1][j]->isEmpty() == TRUE && MeshB[i-1][j]->isEmpty() == TRUE)
 		{
 			delete MeshB[i-1][j];
 			MeshB[i-1][j] = aux_cell;
@@ -82,7 +82,7 @@ void executeMovement(GridCell*** MeshA, GridCell*** MeshB, int i, int j, MTRand*
 		/*
 		Move down
 		*/
-		else if(flags[1] && MeshA[i+1][j]->isEmpty() == TRUE && MeshB[i+1][j]->isEmpty() == TRUE) 
+		else if(flags[1] && MeshA[i+1][j]->isEmpty() == TRUE && MeshB[i+1][j]->isEmpty() == TRUE)
 		{
 			delete MeshB[i+1][j];
 			MeshB[i+1][j] = aux_cell;

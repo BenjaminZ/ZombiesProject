@@ -12,6 +12,8 @@ File: zombiesim.hpp
 #include <string.h>
 #include <math.h>
 #include <vector>
+#include <time.h>
+#include <omp.h>
 
 using namespace std;
 
