@@ -69,9 +69,9 @@ using namespace std;
 #define ELDER_MOVE 0.05
 
 /*Zombies parameters*/
-#define INFECTION_PROB 0.2
+#define INFECTION_PROB 0.0
 #define KILL_ZOMBIE 0.05
-#define NUM_OF_ZOMBIES 2.0
+#define NUM_OF_ZOMBIES 0.0
 #define ZOMBIE_LIFESPAN 4
 #define ZOMBIE_MOVE 0.2
 

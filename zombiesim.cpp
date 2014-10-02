@@ -132,6 +132,7 @@ int main(int argc, char **argv)
 							MeshB[i][j]->setToHuman(new Human(FEMALE, n, YOUNG, HEALTHY));
 						
 						babycounter -= 1;
+						non_empty = 0;
 						continue;
 					}
 				}
