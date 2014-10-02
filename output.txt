@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 Time	Male	Femal	Zombies
 1	22265	20412	2
 2	22244	20388	2
@@ -3651,3 +3652,5 @@ Time	Male	Femal	Zombies
 3650	21216	19461	2
 
 Time spent: 204
+=======
+>>>>>>> 9925da8823f80bd80bb764d5a262d5b455e8e0c2
